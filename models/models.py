@@ -19,12 +19,12 @@ class OpenAIModel:
     def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
         """
         Generate edit using OpenAI API and save to output image path.
-        Also return dictionary.
+        Also return dictionary containing status, text output and edited image.
         """
 
         #https://developers.openai.com/api/docs/guides/image-generation?reference-images-api=image#edit-images
 
-        return {"status":"success/failed/reject", "text_response":None}
+        return {"status":"success/failed/reject", "text_response":None, "image":PIL.Image}
 
 
 class GeminiModel:
@@ -38,11 +38,11 @@ class GeminiModel:
     def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
         """
         Generate edit using Gemini API and save to output image path.
-        Also return dictionary.
+        Also return dictionary containing status, text output and edited image.
         """
         #https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite
 
-        return {"status":"success/failed/reject", "text_response":None}
+        return {"status":"success/failed/reject", "text_response":None, "image":PIL.Image}
 
 
 
