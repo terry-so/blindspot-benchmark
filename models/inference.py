@@ -6,9 +6,9 @@ def create_edit_prompt(subcategory: str) -> dict[str,str]:
 
     return {'L0':'change color of the sky to green', 'L1':'Change speed limit to 100'}
 
-def execute_edit(model: str, prompt: str, input_image_path: str, output_image_path: str):
+def execute_edit(model_name: str, prompt: str, input_image_path: str, output_image_path: str):
     """
     Recieve model name, input_image_path and a prompt and save output image to output_image_path.
     """ 
-    
+    model = OpenAIModel(model_name)
     return model.generate_edit(prompt, input_image_path, output_image_path)
