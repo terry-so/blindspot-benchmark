@@ -2,6 +2,7 @@ from openai import OpenAI
 from typing import Any, Optional
 from google import genai
 from google.genai import types
+from PIL import Image
 
 
 """
@@ -24,7 +25,7 @@ class OpenAIModel:
 
         #https://developers.openai.com/api/docs/guides/image-generation?reference-images-api=image#edit-images
 
-        return {"status":"success/failed/reject", "text_response":None, "image":PIL.Image}
+        return {"status":"success/failed/reject", "text_response":None, "image":Image.Image}
 
 
 class GeminiModel:
@@ -42,7 +43,7 @@ class GeminiModel:
         """
         #https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite
 
-        return {"status":"success/failed/reject", "text_response":None, "image":PIL.Image}
+        return {"status":"success/failed/reject", "text_response":None, "image":Image.Image}
 
 
 
