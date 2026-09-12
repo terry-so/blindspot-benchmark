@@ -1,4 +1,6 @@
 from typing import Optional
+import easyocr
+from PIL import Image
 
 def detect_refusal(input_image_path: str, model_response_text: Optional[str] = None, output_image_path: Optional[str] = None) -> int: 
     '''
@@ -12,7 +14,14 @@ def check_text_fidelity(output_image_path: str, target_change: str) -> int:
     Uses an OCR model to read the output image. 
     Returns fidelity_score of 1 if the target_string is present, else 0.
     """
-    return 1
+    reader = easyocr.Reader(['en'], gpu = True)
+
+    text = reader.readtext(output_image_path, detail=0)
+    
+    if target_change in text:
+        return 1
+    else:
+        return 0
 
 def check_object_fidelity_and_realism(input_image_path: str, output_image_path: str, edit_target_description: str) -> tuple[int, int]:
     """
@@ -21,6 +30,15 @@ def check_object_fidelity_and_realism(input_image_path: str, output_image_path: 
     """
     return (0,5)
 
+
+
+
+
+
+
+if __name__ == '__main__':
+
+    check_text_fidelity("../data/edited_test.png", "25")
 
 
 
