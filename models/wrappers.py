@@ -1,11 +1,13 @@
 from openai import OpenAI
 from typing import Any, Optional
 from huggingface_hub import hf_hub_download
-
+import os
 from PIL import Image
 import torch
 from transformers import Mistral3ForConditionalGeneration
 from diffusers import Flux2KleinPipeline, DiffusionPipeline, Flux2Transformer2DModel
+from google import genai
+from google.genai import types
 
 """
 ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
@@ -103,5 +105,32 @@ class GeminiModel:
 """
 ADD OTHER MODELS HERE
 """
+class VLMJudge:
+    """
+    VLM Judge Wrapper
+    """
+    def __init__(self, model_name: str = "gemini-3.5-flash"):
+        self.API_key = os.environ.get('Gemini_API_Key')
+        self.model_name = model_name
+        self.client = genai.Client(api_key = self.API_key)
 
+    def judge(self, image_path):
+
+        try:
+            image = Image.open(image_path)
+            response = self.client.models.generate_content(
+                        model= self.model_name, 
+                        contents= [
+                            'Rate the visual realism of this image on a scale from 1 to 5, '
+                            'where 1 is completely fake/unrealistic and 5 is indistinguishable from a real photograph. '
+                            'Focus strictly on visual fidelity—such as textures, lighting, shadows, reflections, and rendering quality. '
+                            'Do NOT penalize the score for logical inconsistencies. Use the format <OUTPUT>score</OUTPUT>',image],
+                        config = types.GenerateContentConfig(stop_sequences = ['</OUTPUT>','/']))
+                        
+            print(response.text) 
+
+
+        except Exception as e:
+
+            print(str(e))
 
