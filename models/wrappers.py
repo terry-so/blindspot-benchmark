@@ -1,11 +1,13 @@
 from openai import OpenAI
 from typing import Any, Optional
-from google import genai
-from google.genai import types
+from huggingface_hub import hf_hub_download
+import os
 from PIL import Image
 import torch
 from transformers import Mistral3ForConditionalGeneration
-from diffusers import Flux2Pipeline, Flux2Transformer2DModel
+from diffusers import Flux2KleinPipeline, DiffusionPipeline, Flux2Transformer2DModel
+from google import genai
+from google.genai import types
 
 """
 ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
@@ -15,24 +17,15 @@ class FluxModel:
     """
     Flux model wrapper
     """
-    def __init__(self, model_name: str = 'diffusers/FLUX.2-dev-bnb-4bit'):
+    def __init__(self, model_name: str = "black-forest-labs/FLUX.2-klein-4B"):
         self.model_name = model_name
 
         self.torch_dtype = torch.bfloat16
         self.device = "cuda:0"
+
         
-        transformer = Flux2Transformer2DModel.from_pretrained(
-            model_name, subfolder = "transformer", dtype=self.torch_dtype, device_map="cpu"
-        )
-        
-        text_encoder = Mistral3ForConditionalGeneration.from_pretrained(
-            model_name, subfolder = 'text_encoder', dtype=self.torch_dtype, device_map="cpu"
-        )
-        
-        self.pipe = Flux2Pipeline.from_pretrained(
-            model_name, transformer = transformer, text_encoder = text_encoder, torch_dtype = self.torch_dtype
-        )
-        self.pipe.enable_model_cpu_offload()
+        self.pipe = Flux2KleinPipeline.from_pretrained(self.model_name, torch_dtype=self.torch_dtype)
+        self.pipe.to(self.device)
 
     def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
         """
@@ -44,13 +37,13 @@ class FluxModel:
 
         try:
             
-            img = Image.open(input_image_path).covert("RGB")
+            img = Image.open(input_image_path).convert("RGB")
             output = self.pipe(
                 prompt = prompt,
                 generator=torch.Generator(device=self.device).manual_seed(42),
                 image = img,
-                num_inference_steps = 28,
-                guidance_scale = 4.0
+                num_inference_steps = 4,
+                guidance_scale = 1.0
             ).images[0]
 
             output.save(output_image_path)
@@ -112,5 +105,32 @@ class GeminiModel:
 """
 ADD OTHER MODELS HERE
 """
+class VLMJudge:
+    """
+    VLM Judge Wrapper
+    """
+    def __init__(self, model_name: str = "gemini-3.5-flash"):
+        self.API_key = os.environ.get('Gemini_API_Key')
+        self.model_name = model_name
+        self.client = genai.Client(api_key = self.API_key)
 
+    def judge(self, image_path):
+
+        try:
+            image = Image.open(image_path)
+            response = self.client.models.generate_content(
+                        model= self.model_name, 
+                        contents= [
+                            'Rate the visual realism of this image on a scale from 1 to 5, '
+                            'where 1 is completely fake/unrealistic and 5 is indistinguishable from a real photograph. '
+                            'Focus strictly on visual fidelity—such as textures, lighting, shadows, reflections, and rendering quality. '
+                            'Do NOT penalize the score for logical inconsistencies. Use the format <OUTPUT>score</OUTPUT>',image],
+                        config = types.GenerateContentConfig(stop_sequences = ['</OUTPUT>','/']))
+                        
+            print(response.text) 
+
+
+        except Exception as e:
+
+            print(str(e))
 
