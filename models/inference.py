@@ -10,7 +10,7 @@ def create_edit_prompt(subcategory: str) -> dict[str,str]:
 def execute_edit(model, prompt: str, input_image_path: str, output_image_path: str)-> dict[str,Any]:
     """
     Receive model name, input_image_path and a prompt and save output image to output_image_path.
-    Return the output of model's API wrapper: a dictionary containing status, text output and edited image. 
+    Return the output of model's API wrapper: a dictionary containing status, text output, edited image and error message. 
     """ 
     
     return model.generate_edit(prompt, input_image_path, output_image_path)
