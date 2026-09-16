@@ -112,14 +112,14 @@ class VLMJudge:
     VLM Judge Wrapper
     """
     def __init__(self, model_name: str = "gemini-3.5-flash"):
-        self.API_key = os.environ.get('Gemini_API_Key')
+        self.API_key = os.environ.get('GEMINI_API_KEY')
         self.model_name = model_name
         self.client = genai.Client(api_key = self.API_key)
 
     def judge_realism(self, image_path):
         try:
             image = Image.open(image_path)
-            with open("prompts/realism_judge_prompt.txt",'r') as f:
+            with open("./prompts/realism_judge_prompt.txt",'r') as f:
                 prompt = f.read()
             response = self.client.models.generate_content(
                         model= self.model_name, 
