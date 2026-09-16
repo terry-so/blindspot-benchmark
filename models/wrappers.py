@@ -30,9 +30,9 @@ class FluxModel:
     def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
         """
         Generate edit using FLUX.2 and save to output image path.
-        Also return dictionary containing status, text output and edited image.
+        Also return dictionary containing status, text response and edited image.
         """
-        output_dict = {"status":"failed", "text_response":None,"image":None}
+        output_dict = {"status":"failed", "text_response":None,"image":None, "error":None}
 
 
         try:
@@ -51,11 +51,13 @@ class FluxModel:
             output_dict['status'] = 'success'
             output_dict['text_response'] = None
             output_dict['image'] = output
+            output_dict['error'] = None
 
         except Exception as e:
             output_dict['status'] = 'failed'
-            output_dict['text_response'] = str(e)
+            output_dict['text_response'] = None
             output_dict['image'] = None
+            output_dict['error'] = str(e)
 
         return output_dict
 
@@ -80,7 +82,7 @@ class OpenAIModel:
 
         #https://developers.openai.com/api/docs/guides/image-generation?reference-images-api=image#edit-images
 
-        return {"status":"success/failed/reject", "text_response":None, "image":Image.Image}
+        return {"status":"success/failed", "text_response":None, "image":Image.Image, 'error':None }
 
 
 class GeminiModel:
@@ -98,7 +100,7 @@ class GeminiModel:
         """
         #https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite
 
-        return {"status":"success/failed/reject", "text_response":None, "image":Image.Image}
+        return {"status":"success/failed", "text_response":None, "image":Image.Image, 'error':None }
 
 
 
@@ -114,23 +116,50 @@ class VLMJudge:
         self.model_name = model_name
         self.client = genai.Client(api_key = self.API_key)
 
-    def judge(self, image_path):
-
+    def judge_realism(self, image_path):
         try:
             image = Image.open(image_path)
+            with open("prompts/realism_judge_prompt.txt",'r') as f:
+                prompt = f.read()
             response = self.client.models.generate_content(
                         model= self.model_name, 
-                        contents= [
-                            'Rate the visual realism of this image on a scale from 1 to 5, '
-                            'where 1 is completely fake/unrealistic and 5 is indistinguishable from a real photograph. '
-                            'Focus strictly on visual fidelity—such as textures, lighting, shadows, reflections, and rendering quality. '
-                            'Do NOT penalize the score for logical inconsistencies. Use the format <OUTPUT>score</OUTPUT>',image],
+                        contents= [prompt,image],
                         config = types.GenerateContentConfig(stop_sequences = ['</OUTPUT>','/']))
-                        
+        
             print(response.text) 
-
-
+        
+        
         except Exception as e:
-
+        
             print(str(e))
+
+    def judge_fidelity(self, original_image_path, edited_image_path, prompt):
+            
+            try:
+                original_image = Image.open(original_image_path)
+                edited_image = Image.open(edited_image_path)
+                response = self.client.models.generate_content(
+                            model= self.model_name, 
+                            contents= [
+                                prompt,original_image,edited_image],
+                            config = types.GenerateContentConfig(stop_sequences = ['</OUTPUT>','/']))
+            
+                return(response.text) 
+            
+            
+            except Exception as e:
+            
+                print(str(e))
+
+    def detect_refusal(self,prompt):
+        try:
+            response = self.client.models.generate_content(model = self.model_name, contents = [prompt])
+            return response.text
+        except Exception as e:
+            print(str(e))
+
+       
+            
+
+
 
