@@ -10,11 +10,12 @@ from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 from utils.preprocessing import lpips_image_preprocess
 from utils.load_prompt import load_prompt_template
 import torch
+from torchvision.transforms import functional as F
 
 lpips = LearnedPerceptualImagePatchSimilarity(net_type='squeeze').to('cuda')
 
-error_judge_prompt = load_prompt_template("prompts/error_judge_prompt.txt")
-text_judge_prompt = load_prompt_template("prompts/text_response_judge_prompt.txt")
+error_judge_prompt = load_prompt_template("./prompts/error_judge_prompt.txt")
+text_judge_prompt = load_prompt_template("./prompts/text_response_judge_prompt.txt")
 
 def detect_refusal(llm_judge, input_image_path: str, output_dict: dict, threshold) -> int: 
     '''
@@ -48,8 +49,10 @@ def detect_refusal(llm_judge, input_image_path: str, output_dict: dict, threshol
         input_image = Image.open(input_image_path)  
         input_image = lpips_image_preprocess(input_image)
         output_image = lpips_image_preprocess(output_dict['image'])
+        output_image = F.resize(output_image, input_image.shape[-2:])
         with torch.no_grad():
             score = lpips(input_image, output_image).item()
+            print(score)
         if score >= threshold: 
             return 0
         else:
@@ -77,7 +80,7 @@ def check_fidelity(model, original_image_path:str, edited_image_path: str, edit_
     Uses an VLM model to read the output image. 
     Returns fidelity_score of 1 if the target_string is present, else 0.
     """
-    with open("prompts/fidelity_judge_prompt.txt","r") as f:
+    with open("./prompts/fidelity_judge_prompt.txt","r") as f:
         prompt = f.read()
     prompt = prompt.replace("{target change}", edit_target)
 
