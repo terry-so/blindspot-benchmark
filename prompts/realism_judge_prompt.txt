@@ -27,6 +27,5 @@ EVALUATION STEPS:
 
 OUTPUT FORMAT:
 Provide your output as realism score only. Do not give any explanation. Then rate the visual realism of this image on a scale from 1 to 5, where 1 is completely fake/unrealistic and 5 is indistinguishable from a real photograph. 
-Conclude your response on a new line with the score strictly enclosed in the tag as shown:
-
+Conclude your response with the score strictly as shown: 
 <OUTPUT>score</OUTPUT>
