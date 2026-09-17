@@ -17,3 +17,7 @@ Instructions:
 Inputs:
 Instruction: {instruction}
 Error Message: {error}
+
+Output:
+Only output the label, DO NOT give explanation. The final output must be with this exact format:
+<OUTPUT>REFUSE</OUTPUT> or <OUTPUT>TECHNICAL_ERROR</OUTPUT>
