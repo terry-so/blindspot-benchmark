@@ -5,10 +5,13 @@ import os
 from PIL import Image
 import torch
 from transformers import AutoProcessor, AutoModelForMultimodalLM
-from diffusers import Flux2KleinPipeline, DiffusionPipeline, Flux2Transformer2DModel
+from diffusers import Flux2KleinPipeline
 from google import genai
 from google.genai import types
+from google.genai.types import GenerateContentConfig, Modality, Part
+
 import re
+import base64
 
 """
 ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
@@ -92,16 +95,65 @@ class GeminiModel:
     """
     def __init__(self, model_name: str):
         self.model_name = model_name
-        self.client = genai.Client()
+        self.API_key = os.environ.get('GEMINI_API_KEY')
+        self.client = genai.Client(vertexai=True,
+                                   project = 'gen-lang-client-0115168191',
+                                   location="global")
 
     def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
         """
         Generate edit using Gemini API and save to output image path.
         Also return dictionary containing status, text output and edited image.
         """
-        #https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite
+        output_dict = {"status":"failed", "text_response":None,"image":None, "error":None}
 
-        return {"status":"success/failed", "text_response":None, "image":Image.Image, 'error':None }
+        with open(input_image_path, 'rb') as f:
+            img_bytes = f.read()
+        try:
+            response  = self.client.models.generate_content(
+                model = self.model_name,
+                contents=[
+                    prompt,
+                    Part.from_bytes(
+                        data=img_bytes,
+                        mime_type="image/png",
+                    ),
+                ],
+                config=GenerateContentConfig(
+                    response_modalities=[
+                        Modality.TEXT,
+                        Modality.IMAGE]
+                ),
+            )
+
+            text_parts = []
+            candidates = response.candidates
+            if candidates:
+                content  = candidates[0].content
+                if content and content.parts:
+                    for part in content.parts:
+                        if part.text:
+                            text_parts.append(part.text)
+
+                        if part.inline_data:
+                            with open(output_image_path, "wb") as f:
+                                f.write(part.inline_data.data)
+
+                            output_dict["image"] = Image.open(output_image_path).copy()
+                            
+            output_dict['text_response'] = '\n'.join(text_parts)
+            output_dict["status"] = "success"
+
+        except Exception as e:
+            if "429" in str(e):
+                raise
+            else:
+                output_dict['status'] = 'failed'
+                output_dict['error'] = str(e)
+            
+
+
+        return output_dict
 
 
 
@@ -115,7 +167,9 @@ class VLMJudge:
     def __init__(self, model_name: str = "gemini-3.5-flash"):
         self.API_key = os.environ.get('GEMINI_API_KEY')
         self.model_name = model_name
-        self.client = genai.Client(api_key = self.API_key)
+        self.client = genai.Client(enterprise=True,
+                                           project = 'gen-lang-client-0115168191',
+                                           location="global")
 
     def judge_realism(self, image_path):
         try:
@@ -125,14 +179,19 @@ class VLMJudge:
             response = self.client.models.generate_content(
                         model= self.model_name, 
                         contents= [prompt,image],
-                        config = types.GenerateContentConfig(stop_sequences = ['</OUTPUT>','/']))
+                        )
         
-            print(response.text) 
+            match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", response.text, re.DOTALL)
+            
+            if match:
+                score = match.group(1)
+            
+            return int(score)
         
         
-        except Exception as e:
+        except:
         
-            print(str(e))
+            raise
 
     def judge_fidelity(self, original_image_path, edited_image_path, prompt):
             
@@ -142,22 +201,26 @@ class VLMJudge:
                 response = self.client.models.generate_content(
                             model= self.model_name, 
                             contents= [
-                                prompt,original_image,edited_image],
-                            config = types.GenerateContentConfig(stop_sequences = ['</OUTPUT>','/']))
+                                prompt,original_image,edited_image])
             
-                return(response.text) 
+                match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", response.text, re.DOTALL)
+                
+                if match:
+                    score = match.group(1)
+                
+                return int(score) 
             
             
             except Exception as e:
             
-                print(str(e))
+                raise
 
     def detect_refusal(self,prompt):
         try:
             response = self.client.models.generate_content(model = self.model_name, contents = [prompt])
             return response.text
         except Exception as e:
-            print(str(e))
+            raise
 
        
 class Qwen3:
