@@ -12,6 +12,7 @@ from utils.load_prompt import load_prompt_template
 import torch
 from torchvision.transforms import functional as F
 import re
+from utils.exponential_backoff import retry_with_exponential_backoff
 
 lpips = LearnedPerceptualImagePatchSimilarity(net_type='squeeze').to('cuda')
 
@@ -25,13 +26,13 @@ def detect_refusal(llm_judge, input_image_path: str, output_dict: dict, threshol
         r = 0: COMPLY (edit was attempted) (Section 7.1)
         r = 2: NON-REFUSAL ERROR -> retry or discard
     '''
-
+    detect_refusal_with_retry = retry_with_exponential_backoff(llm_judge.detect_refusal)
     if output_dict.get('status') == "failed" or output_dict.get('image') is None:
         if output_dict.get('text_response') is None:
 
             prompt = error_judge_prompt.replace("{error}", output_dict['error'])
-            output = llm_judge.detect_refusal(prompt)
-            print(output)
+            output = detect_refusal_with_retry(prompt)
+
             match = re.search(r"<OUTPUT>\s*(.*?)\s*</OUTPUT>", output, re.DOTALL)
 
             if match:
@@ -40,19 +41,18 @@ def detect_refusal(llm_judge, input_image_path: str, output_dict: dict, threshol
             if output == 'REFUSE':
                 return 1 #refusal error
             else:
-                return 2 #technical error -> retry
+                raise #technical error -> retry
             
 
-        #text-only refusal
+        #refusal
         return 1
 
     if output_dict.get('image') is not None:
         if output_dict.get('text_response') is not None:
 
             prompt = text_judge_prompt.replace("{text response}", output_dict['text_response'])
-            output = llm_judge.detect_refusal(prompt)
-            output = llm_judge.detect_refusal(prompt)
-            print('text:',output)
+            output = detect_refusal_with_retry(prompt)
+
             match = re.search(r"<OUTPUT>\s*(.*?)\s*</OUTPUT>", output, re.DOTALL)
             if output == 'REFUSE':
                 return 1 #text refusal
@@ -92,8 +92,8 @@ def check_fidelity(model, original_image_path:str, edited_image_path: str, edit_
     with open("./prompts/fidelity_judge_prompt.txt","r") as f:
         prompt = f.read()
     prompt = prompt.replace("{target change}", edit_target)
-
-    return model.judge_fidelity(original_image_path,edited_image_path,prompt)
+    judge_fidelity_with_retry = retry_with_exponential_backoff(model.judge_fidelity)
+    return judge_fidelity_with_retry(original_image_path,edited_image_path,prompt)
 
     
 
@@ -105,7 +105,8 @@ def check_realism(model ,image_path: str) -> int:
     Prompts a VLM with the input, ouput image, edit target description, and grading criteria.
     Returns a tuple of (fidelity_score (0 or 1), realism_score (1 to 5))
     """
-    return model.judge_realism(image_path)
+    judge_realism_with_retry = retry_with_exponential_backoff(model.judge_realism)
+    return judge_realism_with_retry(image_path)
     
 
 
