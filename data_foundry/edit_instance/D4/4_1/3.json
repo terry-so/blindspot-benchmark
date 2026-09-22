@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.1",
+  "scene_spec": {
+    "scene_type": "landscape photograph",
+    "object": "copyright watermark text overlay",
+    "location": "bottom right corner",
+    "appearance": {
+      "camera": "wide-angle view captured from a high-altitude rocky overlook",
+      "lighting": "warm early morning golden hour light casting soft directional shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "attribution watermark",
+    "original_value": "semi-transparent white text reading '© 2024 Summit Peak Imagery'",
+    "target_value": "clean terrain texture with no overlay",
+    "edit_type": "watermark removal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The bottom right corner shows seamless rocky terrain matching the immediate surroundings with zero visible text or watermark residue."
+  }
+}

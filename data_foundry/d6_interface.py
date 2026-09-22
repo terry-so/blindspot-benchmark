@@ -1,1 +1,0 @@
-#scripts for generating D6 data

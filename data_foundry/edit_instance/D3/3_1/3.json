@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "road intersection",
+    "object": "turn restriction sign",
+    "location": "mounted on the overhead mast arm above the right-hand lane",
+    "appearance": {
+      "camera": "slight low-angle perspective looking ahead from a vehicle windshield",
+      "lighting": "overcast weather with diffuse lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "sign instruction symbol",
+    "original_value": "no right turn symbol showing a right-curving black arrow crossed by a red prohibition slash",
+    "target_value": "mandatory right turn symbol showing a white right-curving arrow on a blue circular background",
+    "edit_type": "symbol replacement"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The sign mounted on the overhead mast arm displays a mandatory right turn arrow symbol instead of a no right turn prohibition symbol."
+  }
+}

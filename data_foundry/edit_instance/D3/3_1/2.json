@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "suburban road",
+    "object": "speed limit sign",
+    "location": "grassy shoulder on the right side of the roadway",
+    "appearance": {
+      "camera": "driver-perspective oblique view angled thirty degrees toward the roadside",
+      "lighting": "warm late-afternoon light with long shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "speed limit number",
+    "original_value": "25",
+    "target_value": "75",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "75"
+  }
+}

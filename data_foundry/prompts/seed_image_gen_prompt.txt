@@ -1,0 +1,25 @@
+Generate a realistic, natural-looking photograph of {scene type}.
+
+The image must contain:
+- {object}
+- placed naturally at {location}
+- showing {attribute}
+- featuring a {original_value} symbol integrated realistically into the scene
+
+Requirements:
+- Shot with {camera}
+- Shot with a phone
+- Natural lighting and shadows
+- Captured under {lighting}
+- Add slight motion blur
+- No real people in the image
+- Slightly uneven exposure
+- Minor grain
+- Add camera shake to imitate real photos
+- No over-saturation photo
+- Photorealistic style with natural textures, realistic materials, accurate proportions, and authentic environmental details
+- Natural composition with believable depth, perspective, and background elements
+- Avoid artificial-looking CGI, excessive sharpness, unrealistic colors, or staged appearances
+- The scene should feel like a real photograph taken in the real world
+- No real company logos
+- No real personal information

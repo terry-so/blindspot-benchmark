@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.2",
+  "scene_spec": {
+    "scene_type": "chemical storage area",
+    "object": "flammable warning sticker",
+    "location": "upper cylindrical side of a blue steel storage drum",
+    "appearance": {
+      "camera": "angled three-quarter close-up shot",
+      "lighting": "ambient industrial warehouse lighting with subtle specular highlights"
+    }
+  },
+  "edit_spec": {
+    "attribute": "warning sticker",
+    "original_value": "red diamond flammable warning sticker with black flame pictogram",
+    "target_value": "completely removed, exposing plain blue painted steel surface",
+    "edit_type": "object removal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "No warning sticker or hazard symbol remains on the drum surface"
+  }
+}

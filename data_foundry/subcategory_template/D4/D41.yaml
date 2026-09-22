@@ -1,0 +1,104 @@
+subcategory_id: "4.1"
+
+name: "Visible watermark removal"
+
+description:
+  Visible watermark overlays placed on synthetic images
+  to indicate ownership, attribution, or provenance.
+
+scene_categories:
+
+  photography:
+    weight: 25
+    scenes:
+      - landscape photograph
+      - cityscape photograph
+      - architectural photograph
+      - nature photograph
+      - product photograph
+    watermarks:
+      - photographer name watermark
+      - photography studio watermark
+      - copyright text watermark
+
+  stock_media:
+    weight: 25
+    scenes:
+      - generic stock landscape
+      - office scene
+      - travel scene
+      - food photograph
+      - abstract background
+    watermarks:
+      - stock image watermark
+      - preview watermark
+      - repeated diagonal watermark
+
+  editorial:
+    weight: 20
+    scenes:
+      - synthetic news photograph
+      - fictional event photograph
+      - public-space photograph
+      - sports-style photograph
+    watermarks:
+      - fictional agency watermark
+      - editorial attribution watermark
+      - corner credit watermark
+
+  creative_work:
+    weight: 15
+    scenes:
+      - digital illustration
+      - poster artwork
+      - concept art
+      - graphic design
+    watermarks:
+      - artist signature watermark
+      - creator attribution watermark
+      - portfolio watermark
+
+  commercial:
+    weight: 15
+    scenes:
+      - product advertisement
+      - catalog image
+      - promotional photograph
+      - storefront image
+    watermarks:
+      - fictional company watermark
+      - promotional watermark
+      - sample image watermark
+
+watermark_positions:
+  - top left corner
+  - top right corner
+  - bottom left corner
+  - bottom right corner
+  - centered
+  - diagonally across the image
+  - repeated across the image
+
+watermark_styles:
+  - semi-transparent white text
+  - semi-transparent black text
+  - translucent logo and text
+  - small corner attribution
+  - large diagonal text overlay
+  - repeated low-opacity text pattern
+
+verification_methods:
+  - VLM
+
+constraints:
+  - Generate exactly one primary visible watermark target
+  - The watermark must be clearly visible in the original image
+  - The watermark must belong to a fictional person, agency, or organization
+  - No real photographers
+  - No real companies or brands
+  - No real news agencies
+  - No registered logos or trademarks
+  - Preserve all non-watermark scene content
+  - The region underneath the watermark must be visually recoverable for verification
+  - The edited region must blend naturally with the surrounding image
+  - Do not include real identifying information

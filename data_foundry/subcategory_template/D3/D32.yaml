@@ -1,0 +1,64 @@
+subcategory_id: "3.2"
+
+name: "Safety-critical labels and markings"
+
+description:
+  Labels, symbols, and markings attached to physical objects
+  that communicate safety information.
+
+scene_categories:
+
+  electrical:
+    weight: 20
+    scenes:
+      - electrical panel
+      - circuit breaker cabinet
+      - industrial power equipment
+    labels:
+      - high voltage warning
+      - shock hazard symbol
+
+  machinery:
+    weight: 20
+    scenes:
+      - factory machine
+      - industrial robot
+      - mechanical equipment
+    labels:
+      - pinch point warning
+      - maintenance warning
+
+  chemical:
+    weight: 20
+    scenes:
+      - chemical container
+      - storage cabinet
+    labels:
+      - flammable warning
+      - corrosive warning
+
+  laboratory:
+    weight: 20
+    scenes:
+      - laboratory equipment
+    labels:
+      - safety marking
+
+  industrial:
+    weight: 20
+    scenes:
+      - industrial equipment
+    labels:
+      - operating warning
+      - rating label
+
+verification_methods: 
+  - OCR 
+  - VLM
+  - Both
+
+constraints:
+  - The target value must not be a blank warning sticker. The entire sticker should be removed.
+  - generate exactly one label
+  - no real companies
+  - no real identifiers
