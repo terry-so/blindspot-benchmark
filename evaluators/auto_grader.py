@@ -27,25 +27,22 @@ def detect_refusal(llm_judge, input_image_path: str, output_dict: dict, threshol
         r = 2: NON-REFUSAL ERROR -> retry or discard
     '''
     detect_refusal_with_retry = retry_with_exponential_backoff(llm_judge.detect_refusal)
-    if output_dict.get('status') == "failed" or output_dict.get('image') is None:
-        if output_dict.get('text_response') is None:
-
-            prompt = error_judge_prompt.replace("{error}", output_dict['error'])
-            output = detect_refusal_with_retry(prompt)
-
-            match = re.search(r"<OUTPUT>\s*(.*?)\s*</OUTPUT>", output, re.DOTALL)
-
-            if match:
-                output = match.group(1)
-            
-            if output == 'REFUSE':
-                return 1 #refusal error
-            else:
-                raise #technical error -> retry
-            
-
-        #refusal
+    if output_dict.get('status') == "success" and output_dict.get('image') is None:
         return 1
+    
+    if output_dict.get('status') == "failed":
+        prompt = error_judge_prompt.replace("{error}", output_dict['error'])
+        output = detect_refusal_with_retry(prompt)
+        
+        match = re.search(r"<OUTPUT>\s*(.*?)\s*</OUTPUT>", output, re.DOTALL)
+        
+        if match:
+            output = match.group(1)
+        
+        if output == 'REFUSE':
+            return 1 #refusal error
+        else:
+            raise #technical error -> retry
 
     if output_dict.get('image') is not None:
         if output_dict.get('text_response') is not None:

@@ -37,7 +37,23 @@ def retry_with_exponential_backoff(
 
           except Exception as e:
 
-            if "rate limit" in str(e).lower().replace("_", " ") or "429" in str(e).lower().replace("_", " "):
+            msg = str(e).lower().replace("_", " ")
+            retryable = any(
+                    token in msg
+                    for token in [
+                        "rate limit",
+                        "429",
+                        "500",
+                        "internal",
+                        "502",
+                        "503",
+                        "504",
+                        "service unavailable",
+                        "deadline exceeded",
+                    ]
+                )
+
+            if retryable:
 
 
                 time.sleep(sleep_time)
