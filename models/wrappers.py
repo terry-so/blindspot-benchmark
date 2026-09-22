@@ -1,7 +1,7 @@
 from openai import OpenAI
 from typing import Any, Optional
-from huggingface_hub import hf_hub_download
 import os
+from io import BytesIO
 from PIL import Image
 import torch
 from transformers import AutoProcessor, AutoModelForMultimodalLM
@@ -9,9 +9,10 @@ from diffusers import Flux2KleinPipeline
 from google import genai
 from google.genai import types
 from google.genai.types import GenerateContentConfig, Modality, Part
-
+import yaml
+from pydantic import BaseModel
 import re
-import base64
+import json
 
 """
 ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
@@ -93,12 +94,16 @@ class GeminiModel:
     """
     Gemini model wrapper
     """
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, vertexai = False):
         self.model_name = model_name
         self.API_key = os.environ.get('GEMINI_API_KEY')
-        self.client = genai.Client(vertexai=True,
-                                   project = 'gen-lang-client-0115168191',
-                                   location="global")
+        if vertexai:
+            self.client = genai.Client(vertexai=True,
+                                    project = 'gen-lang-client-0115168191',
+                                    location="global")
+        else:
+            self.client = genai.Client(api_key = self.API_key)
+
 
     def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
         """
@@ -140,8 +145,8 @@ class GeminiModel:
                                 f.write(part.inline_data.data)
 
                             output_dict["image"] = Image.open(output_image_path).copy()
-                            
-            output_dict['text_response'] = '\n'.join(text_parts)
+            if len(text_parts) > 0:             
+                output_dict['text_response'] = '\n'.join(text_parts)
             output_dict["status"] = "success"
 
         except Exception as e:
@@ -154,6 +159,100 @@ class GeminiModel:
 
 
         return output_dict
+    
+    def generate_seed_instance(self, yaml_path):
+            """
+            Generate edit instance using Gemini API. 
+            Return: JSON format string
+            """
+            with open(r"data_foundry\prompts\instance_JSON_prompt.txt","r") as f:
+                prompt = f.read()
+            with open(yaml_path, "r") as f:
+                data = yaml.load(f, Loader = yaml.SafeLoader)
+    
+            prompt = prompt.replace("{template}", str(data))
+    
+            class Appearance(BaseModel):
+                camera: str
+                lighting: str
+    
+            class SceneSpec(BaseModel):
+                scene_type: str
+                object: str
+                location: str
+                appearance: Appearance
+    
+            class EditSpec(BaseModel):
+                attribute: str
+                original_value: str
+                target_value: str
+                edit_type: str
+    
+            class Verification(BaseModel):
+                method: str
+                expected_result: str
+    
+            class BenchmarkJSON(BaseModel):
+                subcategory_id: str
+                scene_spec: SceneSpec
+                edit_spec: EditSpec
+                verification: Verification
+    
+            
+            response  = self.client.models.generate_content(
+                            model = self.model_name,
+                            contents = prompt,
+                            config = types.GenerateContentConfig(
+                                                    response_mime_type="application/json",
+                                                    response_schema=BenchmarkJSON,
+                                                ))
+    
+            return response.text
+
+    def generate_edit_prompt(self, prompt):
+            """
+            Generate edit instance using Gemini API. 
+            Return: JSON format string
+            """
+ 
+            class l2(BaseModel):
+                L2A: str
+                L2B: str
+    
+            class PromptJSON(BaseModel):
+                L0: str
+                L1: str
+                L2: l2
+                L3: list[str]
+   
+            response  = self.client.models.generate_content(
+                            model = self.model_name,
+                            contents = prompt,
+                            config = types.GenerateContentConfig(
+                                                    response_mime_type="application/json",
+                                                    response_schema=PromptJSON,
+                                                ))
+    
+            return response.text
+    
+    def generate_seed_image(self,prompt, output_path):
+
+        response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=(prompt),
+                        config=GenerateContentConfig(
+                            response_modalities=[Modality.TEXT, Modality.IMAGE],
+                        ),
+                    )
+        for part in response.candidates[0].content.parts:
+            if part.text:
+                print(part.text)
+            elif part.inline_data:
+                image = Image.open(BytesIO((part.inline_data.data)))
+                image.save(output_path)
+                    
+
+
 
 
 
