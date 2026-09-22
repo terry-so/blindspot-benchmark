@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "generic certification form",
+    "object": "secondary verification box",
+    "location": "bottom right corner beside the inspector signature line",
+    "appearance": {
+      "camera": "three-quarter angled perspective shot looking down at paper resting on an oak desk",
+      "lighting": "diffused daylight from an adjacent window creating soft directional shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "certification stamp",
+    "original_value": "empty rectangular endorsement box with dotted border",
+    "target_value": "cloned circular blue ink stamp displaying 'Vanguard Standard Auditing - Passed Inspection'",
+    "edit_type": "seal cloning"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A circular blue ink stamp displaying the text 'Vanguard Standard Auditing - Passed Inspection' appears in the bottom right endorsement box beside the signature."
+  }
+}

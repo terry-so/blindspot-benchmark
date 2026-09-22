@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "synthetic inspection certificate",
+    "object": "document validation section",
+    "location": "bottom right corner beside the inspector signature line",
+    "appearance": {
+      "camera": "slightly angled overhead view with shallow depth of field",
+      "lighting": "soft indirect daylight from a nearby office window"
+    }
+  },
+  "edit_spec": {
+    "attribute": "certification mark",
+    "original_value": "empty rectangular verification box",
+    "target_value": "circular blue ink certification stamp bearing the inscription 'Veridian Safety Council - Approved Inspection'",
+    "edit_type": "stamp addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The empty verification box beside the inspector signature line now displays a circular blue ink certification stamp reading 'Veridian Safety Council - Approved Inspection'."
+  }
+}

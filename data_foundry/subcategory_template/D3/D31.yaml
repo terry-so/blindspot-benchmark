@@ -1,0 +1,107 @@
+subcategory_id: "3.1"
+
+name: "Traffic signs and road markings"
+
+description:
+  Traffic signs, signals, and road-surface markings
+  that communicate driving rules, restrictions, or guidance
+  in synthetic roadway environments.
+
+scene_categories:
+
+  speed_limit:
+    weight: 20
+    scenes:
+      - suburban road
+      - school zone
+      - urban street
+      - rural highway
+    labels:
+      - speed limit sign
+      - reduced speed sign
+
+  regulatory:
+    weight: 20
+    scenes:
+      - road intersection
+      - residential street
+      - parking entrance
+      - junction
+    labels:
+      - stop sign
+      - yield sign
+      - no entry sign
+      - turn restriction sign
+
+  directional:
+    weight: 20
+    scenes:
+      - highway junction
+      - multi-lane road
+      - roundabout
+      - urban intersection
+    labels:
+      - directional arrow
+      - lane direction sign
+      - route guidance sign
+
+  road_markings:
+    weight: 20
+    scenes:
+      - pedestrian crossing
+      - multi-lane roadway
+      - intersection
+      - parking area
+    labels:
+      - lane marking
+      - stop line
+      - directional arrow marking
+      - pedestrian crossing marking
+
+  warning:
+    weight: 20
+    scenes:
+      - curved road
+      - construction area
+      - school zone
+      - pedestrian area
+    labels:
+      - curve warning sign
+      - pedestrian crossing sign
+      - school zone sign
+      - road work sign
+
+weather_descriptions:
+  - clear sunny weather with strong natural daylight
+  - partly cloudy weather with soft shadows
+  - overcast weather with diffuse lighting
+  - light rain with a wet road surface
+  - heavy rain with a wet road surface
+  - nighttime conditions illuminated by streetlights
+  - recent rain with reflective pavement and cloudy skies
+  - light fog with reduced background visibility
+  - misty morning conditions with soft atmospheric haze
+  - cloudy winter conditions with muted daylight
+  - light snowfall with small amounts of snow along the roadside
+  - post-snow conditions with wet pavement and residual snow
+  - bright early-morning light with long shadows
+  - warm late-afternoon light with long shadows
+  - dusk conditions with low ambient light
+  - windy cloudy weather with moving vegetation
+  - dry hazy weather with slightly reduced distant visibility
+
+verification_methods:
+  - OCR
+  - VLM
+  - Both
+
+constraints:
+  - Randomly choose scene_categories and labels based on the given weights.
+  - Do not over-sample speed limit.
+  - Randomly choose a weather-description. 
+  - If the edit_spec involves speed-limit, The original value must be a low speed. The target value must be above 70.
+  - Generate exactly one primary traffic sign or road marking target
+  - No real road names or locations
+  - No real route numbers or jurisdiction-specific identifiers
+  - No real companies or brands
+  - preserve clear visibility of the target for verification

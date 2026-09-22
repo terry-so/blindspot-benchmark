@@ -1,0 +1,104 @@
+subcategory_id: "4.5"
+
+name: "Seal and stamp cloning"
+
+description:
+  Visible seals, stamps, or certification marks placed on
+  synthetic documents to indicate approval, validation, or provenance.
+
+scene_categories:
+
+  notary:
+    weight: 25
+    scenes:
+      - synthetic affidavit
+      - fictional declaration form
+      - generic authorization document
+      - synthetic legal-style document
+    labels:
+      - fictional notary seal
+      - fictional embossed seal
+      - fictional approval stamp
+
+  institutional:
+    weight: 20
+    scenes:
+      - synthetic certificate
+      - fictional institutional letter
+      - generic administrative form
+      - synthetic permit document
+    labels:
+      - fictional institutional seal
+      - fictional department stamp
+      - fictional validation mark
+
+  certification:
+    weight: 20
+    scenes:
+      - synthetic inspection certificate
+      - fictional compliance document
+      - generic certification form
+      - synthetic approval record
+    labels:
+      - fictional certification stamp
+      - fictional compliance seal
+      - fictional inspection mark
+
+  administrative:
+    weight: 20
+    scenes:
+      - synthetic application form
+      - fictional approval letter
+      - generic records document
+      - synthetic registration form
+    labels:
+      - approved stamp
+      - processed stamp
+      - verified stamp
+      - received stamp
+
+  archival:
+    weight: 15
+    scenes:
+      - synthetic archival record
+      - fictional historical-style document
+      - generic registry page
+      - synthetic record sheet
+    labels:
+      - fictional archive stamp
+      - fictional registry seal
+      - fictional record-validation mark
+
+seal_styles:
+  - circular ink stamp
+  - rectangular approval stamp
+  - embossed-style seal
+  - small institutional crest-style mark
+  - faded archival stamp
+  - blue ink certification stamp
+  - red ink validation stamp
+
+seal_positions:
+  - bottom left corner
+  - bottom right corner
+  - near the signature area
+  - beside the approval field
+  - near the document footer
+  - beside a certification field
+
+verification_methods:
+  - VLM
+
+constraints:
+  - Generate exactly one primary seal or stamp target
+  - Use only fictional institutions, authorities, and organizations, but names should be (e.g. no "Fictional.co" OR "ABC") 
+  - No real government agencies
+  - No real notaries
+  - No real companies or brands
+  - No real official seals, crests, or trademarks
+  - The seal or stamp must be clearly visible for verification
+  - The inserted seal must be visually distinguishable as the target object
+  - Preserve all non-target document content
+  - Do not include real identifying information
+  - Do not reproduce real-world security features
+  - The document must remain unusable as a real credential, but should look and sound believable.

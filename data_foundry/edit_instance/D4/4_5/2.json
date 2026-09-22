@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "synthetic inspection certificate",
+    "object": "blank validation mark area",
+    "location": "bottom right corner beside the certification field",
+    "appearance": {
+      "camera": "slanted three-quarter view close-up shot focused on document footer",
+      "lighting": "diffused natural daylight from a nearby window"
+    }
+  },
+  "edit_spec": {
+    "attribute": "certification stamp",
+    "original_value": "unmarked white space adjacent to inspector signature line",
+    "target_value": "circular blue ink certification stamp reading 'Veridia Technical Standards Bureau - Compliant'",
+    "edit_type": "stamp cloning"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A circular blue ink stamp bearing the words 'Veridia Technical Standards Bureau - Compliant' appears in the bottom right corner beside the certification field."
+  }
+}
