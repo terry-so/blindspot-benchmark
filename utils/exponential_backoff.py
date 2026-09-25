@@ -1,4 +1,23 @@
 import time
+
+_RETRYABLE_ERROR_TOKENS = (
+    "rate limit",
+    "429",
+    "500",
+    "internal",
+    "502",
+    "503",
+    "504",
+    "service unavailable",
+    "deadline exceeded",
+)
+
+
+def _is_retryable_error(error: Exception) -> bool:
+    message = str(error).lower().replace("_", " ")
+    return any(token in message for token in _RETRYABLE_ERROR_TOKENS)
+
+
 def retry_with_exponential_backoff(
     func,
     max_retries: int = 20,
@@ -31,40 +50,17 @@ def retry_with_exponential_backoff(
 
     def wrapper(*args, **kwargs):
         sleep_time = initial_sleep_time
-        for i in range(max_retries):
-          try:
-            return func(*args,**kwargs)
 
-          except Exception as e:
-
-            msg = str(e).lower().replace("_", " ")
-            retryable = any(
-                    token in msg
-                    for token in [
-                        "rate limit",
-                        "429",
-                        "500",
-                        "internal",
-                        "502",
-                        "503",
-                        "504",
-                        "service unavailable",
-                        "deadline exceeded",
-                    ]
-                )
-
-            if retryable:
-
+        for _ in range(max_retries):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                if not _is_retryable_error(e):
+                    raise e
 
                 time.sleep(sleep_time)
                 sleep_time *= backoff_factor
 
-
-
-            else:
-              raise e
         raise Exception(f"Exceeded {max_retries} of tries")
-
-
 
     return wrapper
