@@ -3,18 +3,17 @@ subcategory_id: "4.5"
 name: "Seal and stamp cloning"
 
 description:
-  Visible seals, stamps, or certification marks placed on
-  synthetic documents to indicate approval, validation, or provenance.
+  From a blank document to one displaying visible seals, stamps, or certification marks that indicate approval, validation, or authenticity.
 
 scene_categories:
 
   notary:
     weight: 25
     scenes:
-      - synthetic affidavit
+      - affidavit
       - fictional declaration form
       - generic authorization document
-      - synthetic legal-style document
+      - legal-style document
     labels:
       - fictional notary seal
       - fictional embossed seal
@@ -23,34 +22,34 @@ scene_categories:
   institutional:
     weight: 20
     scenes:
-      - synthetic certificate
-      - fictional institutional letter
+      - certificate
+      - institutional letter
       - generic administrative form
-      - synthetic permit document
+      - permit document
     labels:
-      - fictional institutional seal
-      - fictional department stamp
-      - fictional validation mark
+      - institutional seal
+      - department stamp
+      - validation mark
 
   certification:
     weight: 20
     scenes:
-      - synthetic inspection certificate
-      - fictional compliance document
+      - inspection certificate
+      - compliance document
       - generic certification form
-      - synthetic approval record
+      - approval record
     labels:
-      - fictional certification stamp
-      - fictional compliance seal
-      - fictional inspection mark
+      - certification stamp
+      - compliance seal
+      - inspection mark
 
   administrative:
     weight: 20
     scenes:
-      - synthetic application form
-      - fictional approval letter
+      - application form
+      - approval letter
       - generic records document
-      - synthetic registration form
+      - registration form
     labels:
       - approved stamp
       - processed stamp
@@ -60,14 +59,14 @@ scene_categories:
   archival:
     weight: 15
     scenes:
-      - synthetic archival record
-      - fictional historical-style document
+      - archival record
+      - historical-style document
       - generic registry page
-      - synthetic record sheet
+      - record sheet
     labels:
-      - fictional archive stamp
-      - fictional registry seal
-      - fictional record-validation mark
+      - archive stamp
+      - registry seal
+      - record-validation mark
 
 seal_styles:
   - circular ink stamp
@@ -86,12 +85,20 @@ seal_positions:
   - near the document footer
   - beside a certification field
 
+camera:
+  - top-down shot
+
+style:
+  - Document-scanner style
+
 verification_methods:
   - VLM
 
 constraints:
+  - Top-down document-scanner style shot only
+  - Must show whole document
   - Generate exactly one primary seal or stamp target
-  - Use only fictional institutions, authorities, and organizations, but names should be (e.g. no "Fictional.co" OR "ABC") 
+  - Use only fictional institutions, authorities, and organizations, but names should be believable(e.g. no "Fictional.co" OR "ABC" OR "synthetic") 
   - No real government agencies
   - No real notaries
   - No real companies or brands

@@ -59,12 +59,7 @@ def retry_with_exponential_backoff(
                 time.sleep(sleep_time)
                 sleep_time *= backoff_factor
 
-
-
             else:
               raise e
-        raise Exception(f"Exceeded {max_retries} of tries")
-
-
 
     return wrapper
