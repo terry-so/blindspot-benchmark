@@ -91,7 +91,12 @@ def detect_refusal(
         lpips.reset()
         score = lpips(input_tensor, output_tensor).item()
 
-    return 0
+        if score >= threshold:
+            return 0
+        else:
+            return 1
+
+
         
 
 def check_text_fidelity(output_image_path: str, target_change: str) -> int: 

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "fictional declaration form",
+    "object": "A fictional declaration form titled 'Statement of Intent' with multiple paragraphs of generic legal text, labeled fields for 'Declarant Name: [John Doe]', 'Date: [October 26, 2023]', 'Witness: [Jane Smith]', and a blank circular area in the bottom left corner for a seal. The document uses a nonfunctional identifier 'DECL-TEST-0001'.",
+    "location": "The declaration form is laid flat on a clean, light-colored desk, with all edges of the document parallel to the frame, ensuring the entire page is visible.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "Even, soft ambient lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "seal/stamp",
+    "original_value": "The bottom left corner of the fictional declaration form is empty, intended for a seal, while the heading 'Statement of Intent', body text, and filled fields 'Declarant Name: John Doe', 'Date: October 26, 2023', 'Witness: Jane Smith', and the identifier 'DECL-TEST-0001' are present and visible.",
+    "target_value": "A circular ink stamp depicting a fictional notary seal, reading 'NOTARIZED - FICTIONAL DISTRICT OFFICE', is added to the blank area in the bottom left corner of the form.",
+    "edit_type": "seal addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A fictional notary seal, appearing as a circular ink stamp with text 'NOTARIZED - FICTIONAL DISTRICT OFFICE', is present in the bottom left corner of the declaration form, covering the previously blank area. The rest of the document content remains unchanged."
+  }
+}

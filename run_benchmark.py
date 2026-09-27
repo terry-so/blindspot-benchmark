@@ -37,17 +37,18 @@ def run_case(model, judge, case, level, output_path, threshold):
     return response_info | labels
 
 
-def run_benchmark(cases, models, judge, thresholds, levels=("L1",), repeats=1):
+def run_benchmark(cases, models, judge, thresholds, levels=("L1",), repeats=1,
+                  result_dir="results"):
     for model_name, model in models.items():
-        result_dir = Path("results") / model_name
-        result_dir.mkdir(parents=True, exist_ok=True)
+        model_dir = Path(result_dir) / model_name
+        model_dir.mkdir(parents=True, exist_ok=True)
 
         for case in cases:
             for level in levels:
                 for repeat in range(repeats):
                     stem = f"{case['case_id']}_{level}_{repeat}"
-                    result_path = result_dir / f"{stem}.json"
-                    output_path = result_dir / f"{stem}.png"
+                    result_path = model_dir / f"{stem}.json"
+                    output_path = model_dir / f"{stem}.png"
 
                     if result_path.exists():
                         saved = json.loads(result_path.read_text())

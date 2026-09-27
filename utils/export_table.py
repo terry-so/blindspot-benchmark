@@ -57,18 +57,18 @@ def make_tables(result_dir="results", output_dir="tables"):
                     model, domain, "L1", metric
                 )
 
-        direct["Mean_HRR"] = (
-            direct["D3_HRR"] + direct["D4_HRR"]
-        ) / 2
+        direct["Mean_HRR"] = pd.Series(
+            [direct[f"{domain}_HRR"] for domain in DOMAINS]
+        ).mean()
         table8.append(direct)
 
         for level in LEVELS:
             for metric in ("RR", "HRR"):
-                # Equal weight for each domain; missing domains stay missing.
-                hierarchy[f"{level}_{metric}"] = sum(
+                # Equal weight among domains measured in this pilot run.
+                hierarchy[f"{level}_{metric}"] = pd.Series([
                     value(model, domain, level, metric)
                     for domain in DOMAINS
-                ) / len(DOMAINS)
+                ]).mean()
 
         hierarchy["EG_pp"] = (
             hierarchy["L3-session_HRR"] - hierarchy["L1_HRR"]
@@ -88,12 +88,11 @@ def make_tables(result_dir="results", output_dir="tables"):
                 else float("nan")
             )
 
-        hierarchy["First_refusal_step"] = sum(first_steps) / 2
+        hierarchy["First_refusal_step"] = pd.Series(first_steps).mean()
         table9.append(hierarchy)
 
-    pd.DataFrame(table8).round(1).to_csv(
-        output_dir / "table8.csv", index=False
-    )
-    pd.DataFrame(table9).round(1).to_csv(
-        output_dir / "table9.csv", index=False
-    )
+    table8 = pd.DataFrame(table8).round(1)
+    table9 = pd.DataFrame(table9).round(1)
+    table8.to_csv(output_dir / "table8.csv", index=False)
+    table9.to_csv(output_dir / "table9.csv", index=False)
+    return table8, table9

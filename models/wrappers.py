@@ -94,7 +94,7 @@ class GeminiModel:
     """
     Gemini model wrapper
     """
-    def __init__(self, model_name: str, vertexai = False):
+    def __init__(self, model_name: str, vertexai = True):
         self.model_name = model_name
         self.API_key = os.environ.get('GEMINI_API_KEY')
         if vertexai:
@@ -176,7 +176,7 @@ class GeminiModel:
             Generate edit instance using Gemini API. 
             Return: JSON format string
             """
-            with open(r"data_foundry\prompts\instance_JSON_prompt.txt","r") as f:
+            with open("data_foundry/prompts/instance_JSON_prompt.txt","r") as f:
                 prompt = f.read()
             with open(yaml_path, "r") as f:
                 data = yaml.load(f, Loader = yaml.SafeLoader)
@@ -443,8 +443,3 @@ class Qwen3:
         except Exception as e:
             print(str(e))
             return None
-
-              
-
-
-

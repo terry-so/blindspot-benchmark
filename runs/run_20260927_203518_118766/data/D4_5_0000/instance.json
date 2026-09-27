@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "fictional declaration form",
+    "object": "a blank fictional declaration form on white paper",
+    "location": "on a plain white desk surface",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "uniform studio lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "document seal/stamp",
+    "original_value": "absence of a seal or stamp",
+    "target_value": "a fictional notary embossed-style seal near the signature area",
+    "edit_type": "seal addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The fictional declaration form displays a fictional notary embossed-style seal positioned near the signature area, clearly indicating notarization."
+  }
+}

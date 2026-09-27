@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "generic authorization document",
+    "object": "A generic authorization document titled 'Authorization of Release' with body text 'This document certifies that the undersigned, after careful review, grants full authorization for the release of the specified information, as detailed below. All parties involved are expected to comply with the terms and conditions herein outlined.', including labeled fields such as 'Document Reference Number: TEST-8765', 'Date of Issue: October 26, 2023', 'Authorized Party: Apex Research Institute', and a blank circular area intended for a seal near the signature line.",
+    "location": "The authorization document is spread flat on a wooden desk, centered and fully visible within the frame.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft, even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "document seal",
+    "original_value": "The designated circular area near the signature line is currently blank.",
+    "target_value": "A fictional notary seal with a circular ink stamp style, displaying 'Certified by Notary Public - Fictional County Authority' and a date, precisely within the previously blank circular area.",
+    "edit_type": "add seal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The authorization document now displays a fictional notary seal with a circular ink stamp style in the designated area near the signature line."
+  }
+}
