@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "certificate",
+    "object": "blank area of a certificate",
+    "location": "near the signature area",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "even, diffuse lighting suitable for scanning"
+    }
+  },
+  "edit_spec": {
+    "attribute": "document seal",
+    "original_value": "absent",
+    "target_value": "embossed-style seal",
+    "edit_type": "addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "An embossed-style seal is visible near the signature area of the certificate."
+  }
+}

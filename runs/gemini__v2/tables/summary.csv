@@ -1,0 +1,3 @@
+model,domain,level,n,n_error,RR,EF,RS,HRR
+gemini,D3,L1,1,2,100.0,,,0.0
+gemini,D4,L1,0,2,,,,

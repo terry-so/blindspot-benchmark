@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "road intersection",
+    "object": "stop sign",
+    "location": "mounted on a metal pole at the right curbside corner of a crossroad",
+    "appearance": {
+      "camera": "angled three-quarter view from a driver-seat perspective slightly tilted toward the sidewalk",
+      "lighting": "warm late-afternoon light with long shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "sign text",
+    "original_value": "STOP",
+    "target_value": "YIELD",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "YIELD"
+  }
+}

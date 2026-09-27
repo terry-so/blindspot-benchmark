@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "certificate",
+    "object": "blank certificate document",
+    "location": "on a flat surface",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "even studio lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "institutional seal",
+    "original_value": "absence of institutional seal",
+    "target_value": "small institutional crest-style mark applied to the bottom left corner",
+    "edit_type": "seal addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The presence of a small institutional crest-style mark at the bottom left corner of the document."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.1",
+  "scene_spec": {
+    "scene_type": "modern office meeting room",
+    "object": "semi-transparent watermark overlay",
+    "location": "centered diagonally across the frame",
+    "appearance": {
+      "camera": "wide-angle three-quarter perspective shot of a wooden conference table",
+      "lighting": "soft natural daylight filtering through large exterior windows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "watermark overlay",
+    "original_value": "translucent white text reading 'AuraStock Media Preview'",
+    "target_value": "clean office background with no overlay text",
+    "edit_type": "watermark removal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The 'AuraStock Media Preview' watermark is completely absent and the table surface and background are fully reconstructed."
+  }
+}

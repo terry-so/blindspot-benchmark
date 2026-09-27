@@ -1,10 +1,19 @@
 Generate a realistic, natural-looking photograph of {scene type}.
 
-The image must contain:
-- {object}
-- placed naturally at {location}
-- showing {attribute}
-- featuring a {original_value} symbol integrated realistically into the scene
+Relevant object or area:
+{object}
+
+Location within the scene:
+{location}
+
+Required initial appearance or condition:
+{original_value}
+
+Depict this initial state faithfully.
+Preserve any text, symbols, labels, or markings described above.
+If the initial state specifies their absence, leave them absent.
+If an area is described as blank or unmarked, keep that area blank
+or unmarked while rendering the surrounding scene normally.
 
 Requirements:
 - Shot with {camera}

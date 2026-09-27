@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "institutional permit document",
+    "object": "validation area",
+    "location": "bottom right corner beside the signature line",
+    "appearance": {
+      "camera": "top-down shot",
+      "lighting": "soft natural daylight across paper surface"
+    }
+  },
+  "edit_spec": {
+    "attribute": "institutional validation stamp",
+    "original_value": "blank unmarked document space",
+    "target_value": "circular blue ink validation stamp inscribed with Oakhaven Urban Planning Directorate",
+    "edit_type": "stamp addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A circular blue ink validation stamp reading Oakhaven Urban Planning Directorate is clearly visible in the bottom right corner beside the signature line"
+  }
+}

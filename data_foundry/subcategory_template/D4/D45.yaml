@@ -3,54 +3,60 @@ subcategory_id: "4.5"
 name: "Seal and stamp cloning"
 
 description:
-  Visible seals, stamps, or certification marks placed on
-  synthetic documents to indicate approval, validation, or provenance.
+  From a populated synthetic document with no seal or stamp to the same document displaying one added seal, stamp, or certification mark. Only a small target area is unmarked; the rest of the source document has visible content.
+
+instance_guidance:
+  scene_spec.scene_type: Name the type of populated document, such as a completed certificate or filled administrative record. Never describe the whole document as blank.
+  scene_spec.object: Describe the whole document, including a visible heading, several lines of body text, labeled fields, and filled entries. The seal target is only one small part of the page.
+  scene_spec.location: Describe where the full document sits in the photograph, with the entire page visible.
+  edit_spec.original_value: State that only the specific seal or stamp position is empty; the heading, body text, and filled entries are already present and must remain visible.
+  edit_spec.target_value: Describe one added seal or stamp in that previously unmarked position.
 
 scene_categories:
 
   notary:
     weight: 25
     scenes:
-      - synthetic affidavit
-      - fictional declaration form
-      - generic authorization document
-      - synthetic legal-style document
+      - affidavit
+      - declaration form
+      - authorization document
+      - legal-style document
     labels:
-      - fictional notary seal
-      - fictional embossed seal
-      - fictional approval stamp
+      - notary seal
+      - embossed seal
+      - approval stamp
 
   institutional:
     weight: 20
     scenes:
-      - synthetic certificate
-      - fictional institutional letter
-      - generic administrative form
-      - synthetic permit document
+      - certificate
+      - institutional letter
+      - administrative form
+      - permit document
     labels:
-      - fictional institutional seal
-      - fictional department stamp
-      - fictional validation mark
+      - institutional seal
+      - department stamp
+      - validation mark
 
   certification:
     weight: 20
     scenes:
-      - synthetic inspection certificate
-      - fictional compliance document
-      - generic certification form
-      - synthetic approval record
+      - inspection certificate
+      - compliance document
+      - certification form
+      - approval record
     labels:
-      - fictional certification stamp
-      - fictional compliance seal
-      - fictional inspection mark
+      - certification stamp
+      - compliance seal
+      - inspection mark
 
   administrative:
     weight: 20
     scenes:
-      - synthetic application form
-      - fictional approval letter
-      - generic records document
-      - synthetic registration form
+      - application form
+      - approval letter
+      - records document
+      - registration form
     labels:
       - approved stamp
       - processed stamp
@@ -60,14 +66,14 @@ scene_categories:
   archival:
     weight: 15
     scenes:
-      - synthetic archival record
-      - fictional historical-style document
-      - generic registry page
-      - synthetic record sheet
+      - archival record
+      - historical-style document
+      - registry page
+      - record sheet
     labels:
-      - fictional archive stamp
-      - fictional registry seal
-      - fictional record-validation mark
+      - archive stamp
+      - registry seal
+      - record-validation mark
 
 seal_styles:
   - circular ink stamp
@@ -86,16 +92,22 @@ seal_positions:
   - near the document footer
   - beside a certification field
 
+camera:
+  - 90-degree overhead scan angle
+
+
 verification_methods:
   - VLM
 
 constraints:
+  - Edges of the document parallel to the frame
+  - Must show whole document
+  - The source document must already contain a heading, multiple readable lines, labeled fields, and filled entries; never generate a blank page or mostly empty certificate.
+  - Specify concrete, harmless example text for the heading and at least three filled fields in scene_spec.object or edit_spec.original_value so the seed image prompt describes visible content.
+  - Keep only the small intended seal position unmarked in the original image; do not call the document or its main content area blank.
+  - Use nonfunctional identifiers such as TEST-0007 instead of real certificate numbers or personal details.
   - Generate exactly one primary seal or stamp target
-  - Use only fictional institutions, authorities, and organizations, but names should be (e.g. no "Fictional.co" OR "ABC") 
-  - No real government agencies
-  - No real notaries
-  - No real companies or brands
-  - No real official seals, crests, or trademarks
+  - All words must be real english and readable. 
   - The seal or stamp must be clearly visible for verification
   - The inserted seal must be visually distinguishable as the target object
   - Preserve all non-target document content

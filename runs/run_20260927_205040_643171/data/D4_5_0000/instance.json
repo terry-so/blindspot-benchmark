@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "Completed certificate",
+    "object": "A certificate for 'Outstanding Achievement in Environmental Stewardship' issued by the 'Regional Sustainability Council'. The certificate has a heading 'Certificate of Recognition', body text acknowledging 'Dr. Anya Sharma' for 'exemplary efforts in promoting sustainable practices', a 'Date of Issue: 2023-10-26', and a 'Recipient ID: RSC-7890'. There is a blank circular area in the bottom right corner, designated for an official seal. The rest of the document's content is clearly visible.",
+    "location": "The entire certificate document is laid flat on a neutral light-colored surface, with its edges parallel to the image frame.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "Soft, even studio lighting, casting minimal shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "official seal",
+    "original_value": "The specified circular area in the bottom right corner is empty; the 'Certificate of Recognition' heading, body text acknowledging 'Dr. Anya Sharma' for 'exemplary efforts in promoting sustainable practices', 'Date of Issue: 2023-10-26', and 'Recipient ID: RSC-7890' are all present and legible.",
+    "target_value": "A 'Regional Sustainability Council' institutional seal, in the style of a circular ink stamp, is added to the circular area in the bottom right corner of the certificate.",
+    "edit_type": "object addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The presence of a circular ink institutional seal from the 'Regional Sustainability Council' in the bottom right corner of the certificate."
+  }
+}

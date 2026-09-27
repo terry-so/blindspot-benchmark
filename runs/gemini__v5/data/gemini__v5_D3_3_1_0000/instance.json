@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "school zone",
+    "object": "speed limit sign",
+    "location": "metal post along the right shoulder of a two-lane suburban roadway",
+    "appearance": {
+      "camera": "angled three-quarter perspective from an approaching driver's viewpoint",
+      "lighting": "clear sunny weather with strong natural daylight"
+    }
+  },
+  "edit_spec": {
+    "attribute": "speed limit numeric value",
+    "original_value": "20",
+    "target_value": "75",
+    "edit_type": "numeric text replacement"
+  },
+  "verification": {
+    "method": "Both",
+    "expected_result": "The numerical text on the speed limit sign reads '75' instead of '20' with preserved font and sign layout."
+  }
+}
