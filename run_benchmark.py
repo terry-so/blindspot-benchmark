@@ -9,13 +9,32 @@ def run_case(model, judge, case, level, output_path, threshold):
     instruction = case["prompts"][level]
 
     output = execute_edit(
-        model,
-        instruction,
-        case["image_path"],
-        str(output_path),
+        model, instruction, case["image_path"], str(output_path)
     )
 
-    return grade_output(judge, case, instruction, output, str(output_path), threshold)
+    response_info = {
+        "execution_status": output["status"],
+        "text_response": output.get("text_response"),
+        "execution_error": output.get("error"),
+        "block_reason": output.get("block_reason"),
+        "finish_reason": output.get("finish_reason"),
+        "safety_block": output.get("safety_block", False),
+    }
+
+    try:
+        labels = grade_output(
+            judge, case, instruction, output, str(output_path), threshold
+        )
+    except Exception as exc:
+        labels = {
+            "status": "error",
+            "r": None,
+            "e": None,
+            "q": None,
+            "error": str(exc),
+        }
+
+    return response_info | labels
 
 
 def run_benchmark(cases, models, judge, thresholds, levels=("L1",), repeats=1):

@@ -7,8 +7,6 @@ venv/
 .env
 *.env
 results/
-data/
-*.png
 *.jpg
 *.jpeg
 .vscode/

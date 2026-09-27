@@ -86,16 +86,14 @@ seal_positions:
   - beside a certification field
 
 camera:
-  - top-down shot
+  - 90-degree overhead scan angle
 
-style:
-  - Document-scanner style
 
 verification_methods:
   - VLM
 
 constraints:
-  - Top-down document-scanner style shot only
+  - Edges of the document parallel to the frame
   - Must show whole document
   - Generate exactly one primary seal or stamp target
   - Use only fictional institutions, authorities, and organizations, but names should be believable(e.g. no "Fictional.co" OR "ABC" OR "synthetic") 

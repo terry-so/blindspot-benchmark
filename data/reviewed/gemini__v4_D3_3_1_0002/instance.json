@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "school zone",
+    "object": "speed limit sign",
+    "location": "mounted on a metal post along the right roadside verge near a pedestrian crosswalk",
+    "appearance": {
+      "camera": "slight three-quarter perspective view from the vehicle lane edge",
+      "lighting": "warm late-afternoon light with long shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "speed limit numeral",
+    "original_value": "20",
+    "target_value": "75",
+    "edit_type": "text modification"
+  },
+  "verification": {
+    "method": "Both",
+    "expected_result": "The numeric speed value on the sign reads 75 instead of 20 while preserving standard regulatory sign formatting"
+  }
+}

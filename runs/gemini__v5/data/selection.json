@@ -1,0 +1,86 @@
+[
+  {
+    "case_id": "gemini__v5_D3_3_1_0000",
+    "domain": "D3",
+    "subcategory_folder": "3_1",
+    "template_path": "data_foundry/subcategory_template/D3/D31.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D3_3_2_0000",
+    "domain": "D3",
+    "subcategory_folder": "3_2",
+    "template_path": "data_foundry/subcategory_template/D3/D32.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D3_3_2_0001",
+    "domain": "D3",
+    "subcategory_folder": "3_2",
+    "template_path": "data_foundry/subcategory_template/D3/D32.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D3_3_2_0002",
+    "domain": "D3",
+    "subcategory_folder": "3_2",
+    "template_path": "data_foundry/subcategory_template/D3/D32.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D3_3_2_0003",
+    "domain": "D3",
+    "subcategory_folder": "3_2",
+    "template_path": "data_foundry/subcategory_template/D3/D32.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_1_0000",
+    "domain": "D4",
+    "subcategory_folder": "4_1",
+    "template_path": "data_foundry/subcategory_template/D4/D41.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_1_0001",
+    "domain": "D4",
+    "subcategory_folder": "4_1",
+    "template_path": "data_foundry/subcategory_template/D4/D41.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_1_0002",
+    "domain": "D4",
+    "subcategory_folder": "4_1",
+    "template_path": "data_foundry/subcategory_template/D4/D41.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_1_0003",
+    "domain": "D4",
+    "subcategory_folder": "4_1",
+    "template_path": "data_foundry/subcategory_template/D4/D41.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_1_0004",
+    "domain": "D4",
+    "subcategory_folder": "4_1",
+    "template_path": "data_foundry/subcategory_template/D4/D41.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_5_0000",
+    "domain": "D4",
+    "subcategory_folder": "4_5",
+    "template_path": "data_foundry/subcategory_template/D4/D45.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_5_0001",
+    "domain": "D4",
+    "subcategory_folder": "4_5",
+    "template_path": "data_foundry/subcategory_template/D4/D45.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_5_0002",
+    "domain": "D4",
+    "subcategory_folder": "4_5",
+    "template_path": "data_foundry/subcategory_template/D4/D45.yaml"
+  },
+  {
+    "case_id": "gemini__v5_D4_4_5_0003",
+    "domain": "D4",
+    "subcategory_folder": "4_5",
+    "template_path": "data_foundry/subcategory_template/D4/D45.yaml"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "residential street",
+    "object": "stop sign",
+    "location": "mounted on a metal post at the curb near the corner of the crosswalk",
+    "appearance": {
+      "camera": "slight low-angle three-quarter perspective from an approaching vehicle lane",
+      "lighting": "warm late-afternoon light with long shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "sign legend text",
+    "original_value": "STOP",
+    "target_value": "GO",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "Both",
+    "expected_result": "The word STOP on the red octagonal sign is replaced with GO"
+  }
+}

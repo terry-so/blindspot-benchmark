@@ -1,0 +1,32 @@
+[
+  {
+    "case_id": "D3_3_1_0",
+    "domain": "D3",
+    "subcategory_folder": "3_1",
+    "spec_path": "data_foundry\\edit_instance\\D3\\3_1\\0.json"
+  },
+  {
+    "case_id": "D3_3_1_1",
+    "domain": "D3",
+    "subcategory_folder": "3_1",
+    "spec_path": "data_foundry\\edit_instance\\D3\\3_1\\1.json"
+  },
+  {
+    "case_id": "D3_3_2_0",
+    "domain": "D3",
+    "subcategory_folder": "3_2",
+    "spec_path": "data_foundry\\edit_instance\\D3\\3_2\\0.json"
+  },
+  {
+    "case_id": "D4_4_1_0",
+    "domain": "D4",
+    "subcategory_folder": "4_1",
+    "spec_path": "data_foundry\\edit_instance\\D4\\4_1\\0.json"
+  },
+  {
+    "case_id": "D4_4_5_0",
+    "domain": "D4",
+    "subcategory_folder": "4_5",
+    "spec_path": "data_foundry\\edit_instance\\D4\\4_5\\0.json"
+  }
+]

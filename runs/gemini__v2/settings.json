@@ -1,0 +1,8 @@
+{
+  "image_model": "gemini-3-pro-image",
+  "prompt_model": "gemini-3.8-flash",
+  "judge_model": "gemini-3.8-flash",
+  "threshold": 0.05,
+  "grading": "VLM-only",
+  "repeats": 1
+}

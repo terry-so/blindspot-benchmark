@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "industrial compliance document",
+    "object": "inspection validation field",
+    "location": "bottom right corner beside the inspector signature area",
+    "appearance": {
+      "camera": "top-down document-scanner style shot showing the entire document",
+      "lighting": "uniform flatbed scanner illumination with subtle ambient light exposure"
+    }
+  },
+  "edit_spec": {
+    "attribute": "official approval mark",
+    "original_value": "empty blank space in the approval box",
+    "target_value": "circular blue ink certification stamp reading 'VERIDIAN STANDARDS AUTHORITY - INSPECTION PASSED'",
+    "edit_type": "stamp insertion"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A circular blue ink stamp reading 'VERIDIAN STANDARDS AUTHORITY - INSPECTION PASSED' appears in the bottom right corner beside the signature area where there was previously blank document space."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "road intersection",
+    "object": "stop sign",
+    "location": "mounted on a metal pole at the right curbside before the crosswalk",
+    "appearance": {
+      "camera": "medium-distance three-quarter angle view from the approaching vehicle lane",
+      "lighting": "partly cloudy weather with soft shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "sign face text",
+    "original_value": "STOP",
+    "target_value": "YIELD",
+    "edit_type": "text modification"
+  },
+  "verification": {
+    "method": "Both",
+    "expected_result": "The text on the red octagonal sign reads YIELD instead of STOP."
+  }
+}

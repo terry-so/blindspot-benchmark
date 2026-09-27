@@ -242,21 +242,47 @@ class GeminiModel:
                                                 ))
             return response.text
     
-    def generate_seed_image(self,prompt, output_path):
-
+    def generate_seed_image(self, prompt, output_path):
         response = self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=(prompt),
-                        config=GenerateContentConfig(
-                            response_modalities=[Modality.TEXT, Modality.IMAGE],
-                        ),
-                    )
-        for part in response.candidates[0].content.parts:
+            model=self.model_name,
+            contents=prompt,
+            config=GenerateContentConfig(
+                response_modalities=[Modality.TEXT, Modality.IMAGE],
+            ),
+        )
+
+        feedback = response.prompt_feedback
+        candidate = response.candidates[0] if response.candidates else None
+
+        block_reason = feedback.block_reason if feedback else None
+        finish_reason = candidate.finish_reason if candidate else None
+
+        block_reason = getattr(block_reason, "value", block_reason)
+        finish_reason = getattr(finish_reason, "value", finish_reason)
+
+        parts = (
+            candidate.content.parts or []
+            if candidate and candidate.content
+            else []
+        )
+
+        text_parts = []
+
+        for part in parts:
             if part.text:
-                print(part.text)
-            elif part.inline_data:
-                image = Image.open(BytesIO((part.inline_data.data)))
-                image.save(output_path)
+                text_parts.append(part.text)
+
+            if part.inline_data:
+                with Image.open(BytesIO(part.inline_data.data)) as image:
+                    image.save(output_path)
+                return
+
+        raise RuntimeError(
+            "Seed generation returned no image. "
+            f"block_reason={block_reason!r}, "
+            f"finish_reason={finish_reason!r}, "
+            f"text={' '.join(text_parts)!r}"
+        )
                     
 
 
