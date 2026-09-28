@@ -16,4 +16,4 @@ To add a reviewed case, copy its folder (including `case.json` and `input.png`) 
 from data_foundry.generate_seed import update_reviewed_dataset
 update_reviewed_dataset()
 ```
-Table exports currently cover D3 and D4; L3 chain evaluation is not implemented yet.
+L3 chain evaluation is not implemented yet.
