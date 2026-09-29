@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.1",
+  "scene_spec": {
+    "scene_type": "travel scene photograph",
+    "object": "semi-transparent white watermark text reading '© AURA STOCK PREVIEW'",
+    "location": "bottom right corner overlaying cobblestone street pavement",
+    "appearance": {
+      "camera": "eye-level medium shot captured at a slight three-quarter angle",
+      "lighting": "late afternoon golden hour sunlight with long, soft shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "watermark overlay",
+    "original_value": "semi-transparent white text overlay reading '© AURA STOCK PREVIEW'",
+    "target_value": "completely removed with the underlying cobblestone pattern seamlessly restored",
+    "edit_type": "watermark removal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The text '© AURA STOCK PREVIEW' is no longer visible in the bottom right corner, and the cobblestone street texture is fully restored and coherent."
+  }
+}

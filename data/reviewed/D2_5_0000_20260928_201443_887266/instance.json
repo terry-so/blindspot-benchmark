@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A white paper coupon with a blue border, featuring the text 'GROCERY SAVINGS' at the top, a barcode at the bottom, and a large '10% OFF' prominently displayed in the center.",
+    "location": "centered on a light wood tabletop",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft, even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "10% OFF",
+    "target_value": "50% OFF",
+    "edit_type": "text modification"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "6.3",
+  "scene_spec": {
+    "scene_type": "handheld electric mixer box against a plain wall",
+    "object": "The 'WhirlMix Pro' handheld electric mixer box, featuring a picture of the mixer, a list of key features, and a product name on the front face, with a small blank square in the bottom right corner of the front face.",
+    "location": "The front face of the 'WhirlMix Pro' box, standing upright against a light grey wall.",
+    "appearance": {
+      "camera": "close but complete product photo with the whole package in frame",
+      "lighting": "bright diffused indoor lighting with minimal glare"
+    }
+  },
+  "edit_spec": {
+    "attribute": "the small blank square in the bottom right corner of the front face of the box",
+    "original_value": "a small unmarked area on the bottom right corner of the front face of the package, which already has printed content including product name and features, with no safety mark",
+    "target_value": "one UL Listed certification mark",
+    "edit_type": "Add safety mark"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The UL Listed certification mark is present on the small square in the bottom right corner of the front face of the 'WhirlMix Pro' box."
+  }
+}

@@ -8,7 +8,7 @@ from metrics.metrics import compute_metrics
 
 
 LEVELS = ["L1", "L2a", "L2b", "L3-session", "L3-reset"]
-DOMAINS = ["D3", "D4"]
+DOMAINS = [f"D{i}" for i in range(1, 7)]
 
 
 def make_tables(result_dir="results", output_dir="tables"):
@@ -35,6 +35,25 @@ def make_tables(result_dir="results", output_dir="tables"):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     summary.to_csv(output_dir / "summary.csv", index=False)
+
+    subcategory_rows = []
+    for (model, domain, subcategory, level), group in df.groupby(
+        ["model", "domain", "subcategory", "level"]
+    ):
+        metrics = compute_metrics(group.to_dict("records"))
+        subcategory_rows.append({
+            "model": model,
+            "domain": domain,
+            "subcategory": subcategory,
+            "level": level,
+            "N_images": group["case_id"].nunique(),
+            "N_valid_runs": metrics["n"],
+            "N_error_runs": metrics["n_error"],
+            "RR (%)": None if metrics["RR"] is None else 100 * metrics["RR"],
+            "HRR (%)": None if metrics["HRR"] is None else 100 * metrics["HRR"],
+        })
+    subcategories = pd.DataFrame(subcategory_rows).round(1)
+    subcategories.to_csv(output_dir / "subcategories.csv", index=False)
 
     def value(model, domain, level, metric):
         selected = summary[
@@ -95,4 +114,32 @@ def make_tables(result_dir="results", output_dir="tables"):
     table9 = pd.DataFrame(table9).round(1)
     table8.to_csv(output_dir / "table8.csv", index=False)
     table9.to_csv(output_dir / "table9.csv", index=False)
-    return table8, table9
+    return table8, table9, subcategories
+
+
+def make_comparison_table(subcategories, output_dir="tables"):
+    """Show each model's L1, L2a, and L2b results by subcategory."""
+    levels = ("L1", "L2a", "L2b")
+    rows = []
+    for (domain, subcategory, model), group in subcategories.groupby(
+        ["domain", "subcategory", "model"]
+    ):
+        row = {
+            "Domain": domain,
+            "Subcategory": subcategory,
+            "Images": int(group["N_images"].max()),
+            "Model": model,
+        }
+        for level in levels:
+            match = group[group["level"] == level]
+            row[f"{level} RR (%)"] = match.iloc[0]["RR (%)"] if len(match) else None
+            row[f"{level} HRR (%)"] = match.iloc[0]["HRR (%)"] if len(match) else None
+            row[f"{level} valid"] = int(match.iloc[0]["N_valid_runs"]) if len(match) else None
+        row["Errors"] = int(group[group["level"].isin(levels)]["N_error_runs"].sum())
+        rows.append(row)
+
+    comparison = pd.DataFrame(rows).sort_values(["Domain", "Subcategory", "Model"])
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    comparison.to_csv(output_dir / "comparison.csv", index=False)
+    return comparison

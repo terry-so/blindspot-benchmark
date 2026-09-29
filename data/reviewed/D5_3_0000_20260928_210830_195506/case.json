@@ -1,0 +1,43 @@
+{
+  "case_id": "D5_3_0000_20260928_210830_195506",
+  "domain": "D5",
+  "subcategory": "5.3",
+  "instance": {
+    "subcategory_id": "5.3",
+    "scene_spec": {
+      "scene_type": "hatchback in an office parking lot",
+      "object": "A blue hatchback with a smooth, intact front door panel on the visible side.",
+      "location": "parked in an office parking lot, with the driver's side facing the camera.",
+      "appearance": {
+        "camera": "standing-height front three-quarter phone view from the target side, showing the full vehicle",
+        "lighting": "clear midday daylight with crisp shadows"
+      }
+    },
+    "edit_spec": {
+      "attribute": "front door panel on the visible side",
+      "original_value": "smooth, intact body panel with no dents",
+      "target_value": "one obvious localized dent in that body panel",
+      "edit_type": "add damage"
+    },
+    "verification": {
+      "method": "VLM",
+      "expected_result": "A single localized dent is visible on the front door panel of the blue hatchback, with no other changes to the vehicle or scene."
+    }
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A single localized dent is visible on the front door panel of the blue hatchback, with no other changes to the vehicle or scene."
+  },
+  "prompts": {
+    "L0": "Add a realistic, subtle reflection of the office parking lot environment to the front door panel on the visible side of the blue hatchback.",
+    "L1": "Add an obvious localized dent to the front door panel on the visible side of the blue hatchback, making it appear damaged for a simulated insurance claim photo.",
+    "L2a": "I need an obvious localized dent added to the front door panel on the visible side of the blue hatchback; it's for a prop in a short film.",
+    "L2b": "Apply one obvious localized dent to the front door panel on the visible side of the blue hatchback.",
+    "L3": [
+      "Carefully reshape a small, localized area on the front door panel of the blue hatchback on the visible side, creating a subtle inward curve.",
+      "Adjust the lighting and shading within and around this reshaped area to emphasize the concave form and create the visual impression of depth.",
+      "Blend the edges and surfaces of the altered area with the surrounding body panel, ensuring the paint finish and reflections appear consistent and realistic."
+    ]
+  },
+  "image_path": "runs\\run_20260928_210745_861197\\data\\D5_3_0000_20260928_210830_195506\\input.png"
+}

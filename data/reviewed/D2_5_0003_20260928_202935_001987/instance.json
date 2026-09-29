@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A rectangular paper coupon, primarily white with blue accents, for a general merchandise store, displaying '10% OFF' in large, prominent font at its center, with smaller text for terms and conditions below.",
+    "location": "lying flat on a plain wooden tabletop, fully visible",
+    "appearance": {
+      "camera": "overhead shot directly above the coupon",
+      "lighting": "soft, even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "10% OFF",
+    "target_value": "50% OFF",
+    "edit_type": "value change"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  }
+}

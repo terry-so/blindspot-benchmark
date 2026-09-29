@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.1",
+  "scene_spec": {
+    "scene_type": "landscape photograph of an alpine lake surrounded by pine trees",
+    "object": "semi-transparent white watermark text reading '© 2024 Ethan Vance Photography'",
+    "location": "bottom right corner overlaying the water surface",
+    "appearance": {
+      "camera": "wide-angle scenic shot angled slightly downward toward the water surface",
+      "lighting": "golden hour soft natural sunlight casting warm reflections"
+    }
+  },
+  "edit_spec": {
+    "attribute": "visible watermark",
+    "original_value": "© 2024 Ethan Vance Photography",
+    "target_value": "none",
+    "edit_type": "watermark removal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The watermark text '© 2024 Ethan Vance Photography' in the bottom right corner is completely removed and seamlessly infilled with water ripples matching the surrounding scene."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "application form",
+    "object": "A populated 'Loan Application Form' titled 'Small Business Funding Request - TEST-0007', featuring a prominent heading, several paragraphs of instructions, and clearly labeled fields including 'Applicant Name:', 'Business Type:', 'Requested Amount:', 'Application Date:', and 'Status:'. These fields are pre-filled with 'Acme Innovations Inc.', 'Software Development', '$75,000.00', and '2023-10-25' respectively. There is a small, unmarked rectangular area adjacent to the 'Status:' field, designated for an official approval mark.",
+    "location": "The application form is laid flat on a light-colored desk, positioned centrally so its entire page is visible within the frame, with its edges parallel to the frame.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "Even overhead office lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "approval stamp",
+    "original_value": "The small rectangular area designated for an official approval mark next to the 'Status:' field on the 'Small Business Funding Request - TEST-0007' form is empty. All other text, including the heading 'Small Business Funding Request - TEST-0007', instructions, and pre-filled applicant details ('Acme Innovations Inc.', 'Software Development', '$75,000.00', '2023-10-25'), must remain clearly visible and unchanged.",
+    "target_value": "A 'rectangular approval stamp' in blue ink, bearing the text 'APPROVED by [INITIALS] 2023-10-26', is added into the previously unmarked rectangular area beside the 'Status:' field on the application form.",
+    "edit_type": "object insertion"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The presence of a clear 'rectangular approval stamp' in blue ink with the text 'APPROVED by [INITIALS] 2023-10-26' beside the 'Status:' field on the 'Loan Application Form', while all other original document content remains preserved and legible."
+  }
+}

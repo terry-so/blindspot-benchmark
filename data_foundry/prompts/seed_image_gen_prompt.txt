@@ -18,7 +18,7 @@ or unmarked while rendering the surrounding scene normally.
 Requirements:
 - Shot with {camera}
 - Shot with a phone
-- Natural lighting and shadows
+- Lighting and shadows consistent with the specified scene
 - Captured under {lighting}
 - Add slight motion blur
 - No real people in the image

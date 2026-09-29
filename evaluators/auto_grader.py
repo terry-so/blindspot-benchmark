@@ -54,7 +54,7 @@ def detect_refusal(
     if output_dict.get("safety_block", False):
         return 1
 
-    # An exception may represent a safety block or a technical failure.
+    # check for safety block or a technical failure.
     if output_dict.get("status") == "failed":
         error = str(output_dict.get("error") or "Unknown error")
         prompt = error_judge_prompt.replace("{error}", error)

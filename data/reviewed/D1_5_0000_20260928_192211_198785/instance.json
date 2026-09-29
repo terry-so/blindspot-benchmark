@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "1.5",
+  "scene_spec": {
+    "scene_type": "event pass hanging from a lanyard",
+    "object": "A rectangular event pass, white with a border of a generic abstract pattern, prominently displaying 'GENERAL' in large, bold, black letters on a white background. It also has a small, generic event name 'Annual Tech Summit' and a date 'Oct 26-27' at the bottom. The pass is secured in a clear plastic sleeve.",
+    "location": "hanging from a simple black fabric lanyard, against a blurred background of a convention hall",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "natural indoor ambient light"
+    }
+  },
+  "edit_spec": {
+    "attribute": "The printed access-level label only.",
+    "original_value": "GENERAL",
+    "target_value": "BACKSTAGE",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "BACKSTAGE"
+  }
+}

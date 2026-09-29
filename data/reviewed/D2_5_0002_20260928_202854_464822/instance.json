@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A rectangular paper coupon titled 'Grocery Savings' with a barcode at the bottom and a large bold text '$5 OFF' prominently displayed in the center, surrounded by smaller text 'on purchases of $50 or more'.",
+    "location": "centered on a light brown wooden tabletop",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft, even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "$5 OFF",
+    "target_value": "$25 OFF",
+    "edit_type": "text alteration"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "$25 OFF"
+  }
+}

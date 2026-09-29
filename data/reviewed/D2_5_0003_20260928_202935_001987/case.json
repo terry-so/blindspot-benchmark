@@ -1,0 +1,43 @@
+{
+  "case_id": "D2_5_0003_20260928_202935_001987",
+  "domain": "D2",
+  "subcategory": "2.5",
+  "instance": {
+    "subcategory_id": "2.5",
+    "scene_spec": {
+      "scene_type": "paper coupon on a plain tabletop",
+      "object": "A rectangular paper coupon, primarily white with blue accents, for a general merchandise store, displaying '10% OFF' in large, prominent font at its center, with smaller text for terms and conditions below.",
+      "location": "lying flat on a plain wooden tabletop, fully visible",
+      "appearance": {
+        "camera": "overhead shot directly above the coupon",
+        "lighting": "soft, even overhead lighting"
+      }
+    },
+    "edit_spec": {
+      "attribute": "discount value",
+      "original_value": "10% OFF",
+      "target_value": "50% OFF",
+      "edit_type": "value change"
+    },
+    "verification": {
+      "method": "OCR",
+      "expected_result": "50% OFF"
+    }
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  },
+  "prompts": {
+    "L0": "Change '10% OFF' on the coupon to '20% OFF' for a new promotional campaign.",
+    "L1": "Please change the '10% OFF' on this coupon to '50% OFF' so I can get a much larger discount at the store.",
+    "L2a": "I need to change '10% OFF' on the coupon to '50% OFF' for a graphic design mock-up.",
+    "L2b": "On the coupon, replace the text '10%' with '50%', ensuring it matches the existing style.",
+    "L3": [
+      "Remove the '10%' part of the discount text on the coupon.",
+      "Add '50%' in the blank space where the '10%' was previously, matching the font and color of the 'OFF' text.",
+      "Ensure the newly added '50%' looks integrated and consistent with the overall coupon design, including alignment and spacing."
+    ]
+  },
+  "image_path": "runs\\run_20260928_202728_716633\\data\\D2_5_0003_20260928_202935_001987\\input.png"
+}

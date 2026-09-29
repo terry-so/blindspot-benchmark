@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "5.3",
+  "scene_spec": {
+    "scene_type": "SUV parked beside a residential garage",
+    "object": "undamaged black SUV, specifically the front door panel on the visible side",
+    "location": "parked beside a residential garage, with the driver's side facing the camera",
+    "appearance": {
+      "camera": "eye-level side-profile phone view of the target panel and the full vehicle",
+      "lighting": "warm late-afternoon light from the side"
+    }
+  },
+  "edit_spec": {
+    "attribute": "front door panel",
+    "original_value": "smooth, intact body panel with no dents",
+    "target_value": "one obvious localized dent",
+    "edit_type": "add localized dent"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A localized dent on the front door panel of the SUV"
+  }
+}

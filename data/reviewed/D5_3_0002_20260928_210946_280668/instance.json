@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "5.3",
+  "scene_spec": {
+    "scene_type": "SUV parked beside a residential garage",
+    "object": "an undamaged dark grey SUV, with the rear quarter panel on the passenger side clearly visible",
+    "location": "parked in a residential driveway, with the passenger side facing the camera",
+    "appearance": {
+      "camera": "standing-height rear three-quarter phone view from the target side, showing the full vehicle",
+      "lighting": "bright overcast daylight with soft shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "rear quarter panel on the passenger side of the dark grey SUV",
+    "original_value": "smooth, intact dark grey rear quarter panel with no dents",
+    "target_value": "one obvious localized dent in the dark grey rear quarter panel",
+    "edit_type": "add damage"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "a single, clearly visible dent on the rear quarter panel of the SUV, located on the passenger side."
+  }
+}

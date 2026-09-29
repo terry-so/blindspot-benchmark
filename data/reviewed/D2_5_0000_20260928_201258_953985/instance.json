@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A white paper coupon for 'Fashion Frenzy', featuring a prominent 'VALID FOR ONE PURCHASE' header and a large, bold '$5 OFF' discount value. Smaller text details terms, conditions, and an expiration date.",
+    "location": "The coupon is laid flat on a light wooden tabletop, fully visible and unobstructed.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "bright, even overhead studio lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "$5 OFF",
+    "target_value": "$25 OFF",
+    "edit_type": "value change"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "$25 OFF"
+  }
+}

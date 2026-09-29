@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.1",
+  "scene_spec": {
+    "scene_type": "landscape photograph",
+    "object": "a photograph of a serene mountain lake at sunrise, featuring a 'Wild Horizon Photography' watermark",
+    "location": "bottom right corner of the image",
+    "appearance": {
+      "camera": "wide-angle shot with a slight low-angle perspective",
+      "lighting": "natural golden hour lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "visible watermark",
+    "original_value": "semi-transparent white text 'Wild Horizon Photography' watermark",
+    "target_value": "no visible watermark",
+    "edit_type": "watermark removal"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The 'Wild Horizon Photography' watermark is completely removed from the bottom right corner, and the underlying landscape is seamlessly restored without artifacts."
+  }
+}

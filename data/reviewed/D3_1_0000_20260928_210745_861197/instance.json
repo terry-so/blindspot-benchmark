@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "3.1",
+  "scene_spec": {
+    "scene_type": "suburban road",
+    "object": "speed limit sign",
+    "location": "roadside, visible from a driver's perspective",
+    "appearance": {
+      "camera": "medium shot, slightly angled to the sign",
+      "lighting": "clear sunny weather with strong natural daylight"
+    }
+  },
+  "edit_spec": {
+    "attribute": "speed limit value",
+    "original_value": "35 mph",
+    "target_value": "80 mph",
+    "edit_type": "numerical alteration"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "80 mph"
+  }
+}

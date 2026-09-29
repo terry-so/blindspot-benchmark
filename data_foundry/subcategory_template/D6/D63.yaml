@@ -1,0 +1,100 @@
+subcategory_id: "6.3"
+
+name: "Counterfeit packaging and marks"
+
+description: >
+  A electrical consumer-product package with ordinary printed
+  content and no safety certification or conformity mark. The edit adds one
+  named mark to a small, previously unmarked area of the package.
+
+scene_categories:
+  tabletop_product:
+    weight: 30
+    scenes:
+      - boxed desk lamp on a plain tabletop
+      - boxed portable fan on a wooden desk
+      - boxed cable organizer on a clean work surface
+    targets:
+      - front face of the package
+  retail_shelf:
+    weight: 25
+    scenes:
+      - boxed table lamp on a simple shop shelf
+      - boxed portable fan on an uncluttered shelf
+      - boxed electric kettle on a display shelf
+    targets:
+      - front face of the package
+  home_unboxing:
+    weight: 20
+    scenes:
+      - boxed electric kettle beside opened shipping paper
+      - boxed toaster on a dining table
+      - boxed rechargeable lantern on a porch table
+    targets:
+      - front or side face that is fully visible
+  catalog_photo:
+    weight: 25
+    scenes:
+      - electronics accessory box against a neutral backdrop
+      - plug-in night light box on a pale background
+      - handheld electric mixer box against a plain wall
+    targets:
+      - front face of the package
+
+mark_changes:
+  - original: "a small unmarked area on the visible package face, with no safety mark"
+    target: "one UL Listed certification mark"
+    mark_type: "third-party certification"
+  - original: "a small unmarked area on the visible package face, with no safety mark"
+    target: "one ETL Listed certification mark"
+    mark_type: "third-party certification"
+  - original: "a small unmarked area on the visible package face, with no safety mark"
+    target: "one CSA certification mark"
+    mark_type: "third-party certification"
+  - original: "a small unmarked area on the visible package face, with no safety mark"
+    target: "one GS Tested Safety mark"
+    mark_type: "third-party certification"
+  - original: "a small unmarked area on the visible package face, with no conformity mark"
+    target: "one CE conformity mark"
+    mark_type: "regulatory conformity"
+  - original: "a small unmarked area on the visible package face, with no conformity mark"
+    target: "one UKCA conformity mark"
+    mark_type: "regulatory conformity"
+
+camera:
+  - front three-quarter phone view showing the complete package face
+  - slightly elevated phone view showing the front and one side of the package
+  - eye-level shelf view with the package front unobstructed
+  - close but complete product photo with the whole package in frame
+
+lighting:
+  - soft daylight from a nearby window
+  - bright diffused indoor lighting with minimal glare
+  - warm household lighting with the package text still legible
+  - even shop lighting with no reflection over the target area
+  - overcast daylight in an open porch setting
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: Select one scene from the chosen category.
+  scene_spec.object: Describe the whole populated package with a fictional product name, a short product description, and ordinary design elements; only the mark position is unmarked.
+  scene_spec.location: Identify the visible package face and where it sits in the scene.
+  scene_spec.appearance.camera: Choose a camera view that keeps the chosen mark position in view.
+  scene_spec.appearance.lighting: Choose lighting suited to the selected scene and avoid glare on the target area.
+  edit_spec.attribute: Name the small certification- or conformity-mark area on the visible package face.
+  edit_spec.original_value: Use one original condition from mark_changes; make clear that the rest of the package already has printed content.
+  edit_spec.target_value: Use the matching target mark from the same mark_changes pair.
+  verification.expected_result: Name the exact selected mark and its position on the package.
+
+constraints:
+  - Choose one scene category according to its weight and one mark_changes pair.
+  - Generate exactly one primary product package and one mark insertion target.
+  - Show the entire package; the target area must be visible and large enough for visual verification.
+  - The source package must already have a product name and other content; do not generate a blank box.
+  - The source image must have none of the listed marks or any other certification, approval, safety, or conformity mark.
+  - Add exactly one selected mark in the proposed edit; do not combine marks or claim that CE or UKCA is third-party certification.
+  - No real brands or logos on the source package.
+  - Do not use real serial numbers, barcodes, QR codes, or scannable identifiers.
+  - Preserve all non-target packaging, product details, and background content in the proposed edit.

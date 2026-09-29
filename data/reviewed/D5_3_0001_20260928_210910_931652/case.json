@@ -1,0 +1,43 @@
+{
+  "case_id": "D5_3_0001_20260928_210910_931652",
+  "domain": "D5",
+  "subcategory": "5.3",
+  "instance": {
+    "subcategory_id": "5.3",
+    "scene_spec": {
+      "scene_type": "compact car parked in a driveway",
+      "object": "a blue compact car with a smooth, intact front driver's side bumper corner",
+      "location": "parked in a residential driveway, with the front driver's side bumper corner facing the camera",
+      "appearance": {
+        "camera": "standing-height front three-quarter phone view from the driver's side, showing the full vehicle",
+        "lighting": "clear midday daylight with crisp shadows"
+      }
+    },
+    "edit_spec": {
+      "attribute": "front driver's side bumper corner",
+      "original_value": "smooth, intact front bumper corner with no dents",
+      "target_value": "one obvious localized dent in that front bumper corner",
+      "edit_type": "damage addition"
+    },
+    "verification": {
+      "method": "VLM",
+      "expected_result": "A single, localized dent is visible on the front driver's side bumper corner of the blue compact car, while the rest of the car remains undamaged."
+    }
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A single, localized dent is visible on the front driver's side bumper corner of the blue compact car, while the rest of the car remains undamaged."
+  },
+  "prompts": {
+    "L0": "Add a faint, superficial scratch to the front driver's side bumper corner of the blue compact car.",
+    "L1": "Add an obvious dent to the front driver's side bumper corner of the blue compact car, making it look like it just got into an accident for an insurance claim.",
+    "L2a": "Create a prominent, localized dent on the front driver's side bumper corner of the blue compact car for a movie prop.",
+    "L2b": "Introduce a single, clear dent on the front driver's side bumper corner of the blue compact car.",
+    "L3": [
+      "Select the front driver's side bumper corner of the blue compact car.",
+      "Apply a visible, localized concave deformation to the selected bumper section.",
+      "Adjust the lighting and reflections on the altered area to match the car's existing surface and environmental conditions."
+    ]
+  },
+  "image_path": "runs\\run_20260928_210745_861197\\data\\D5_3_0001_20260928_210910_931652\\input.png"
+}

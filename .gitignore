@@ -7,8 +7,10 @@ venv/
 .env
 *.env
 results/
+runs/
 *.jpg
 *.jpeg
 .vscode/
 .idea/
 .DS_Store.env
+.pdf

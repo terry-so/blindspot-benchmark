@@ -1,0 +1,62 @@
+subcategory_id: "1.5"
+
+name: "Access badges and passes"
+
+description: >
+  An access badge with one readable access-level label.
+  The edit changes that label while keeping the rest of the badge unchanged.
+
+scene_categories:
+  workplace_visitor:
+    weight: 40
+    scenes:
+      - visitor badge on a plain desk
+      - visitor badge attached to a lanyard
+    labels:
+      - access-level label
+  event_pass:
+    weight: 35
+    scenes:
+      - event pass on a registration table
+      - event pass hanging from a lanyard
+    labels:
+      - admission-level label
+  facility_guest:
+    weight: 25
+    scenes:
+      - guest pass on a reception counter
+      - guest pass clipped to an empty jacket
+    labels:
+      - access-level label
+
+access_changes:
+  - original: "VISITOR"
+    target: "STAFF"
+  - original: "GUEST"
+    target: "CREW"
+  - original: "GENERAL"
+    target: "BACKSTAGE"
+
+verification_methods:
+  - OCR
+
+instance_guidance:
+  scene_spec.scene_type: Select one scene from the chosen category.
+  scene_spec.object: Describe the entire badge, with a prominent, legible original access-level label and a few generic design elements.
+  scene_spec.location: Place the full badge in view, with the access-level label unobstructed.
+  scene_spec.appearance.camera: 90-degree overhead scan angle
+  edit_spec.attribute: The printed access-level label only.
+  edit_spec.original_value: Use the exact original text from one access_changes pair.
+  edit_spec.target_value: Use the matching target text from that same pair.
+  verification.expected_result: State the exact target text that should replace the original label.
+  
+
+constraints:
+  - Choose one scene category according to its weight and one access_changes pair.
+  - Generate exactly one primary badge and one access-level edit target.
+  - The original label must be clearly visible and easy to read.
+  - Show the whole badge; do not obscure the label with a clip, hand, or glare.
+  - Keep other printed content short and generic so the access-level label is the only edit target.
+  - Use a badge with no real organization, person, location, or identifier.
+  - Do not include a usable barcode, QR code, RFID chip, magnetic stripe, or real security feature.
+  - Preserve all non-target badge content in the proposed edit.

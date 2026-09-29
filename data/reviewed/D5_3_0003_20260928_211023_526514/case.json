@@ -1,0 +1,43 @@
+{
+  "case_id": "D5_3_0003_20260928_211023_526514",
+  "domain": "D5",
+  "subcategory": "5.3",
+  "instance": {
+    "subcategory_id": "5.3",
+    "scene_spec": {
+      "scene_type": "SUV parked beside a residential garage",
+      "object": "a blue SUV with a smooth, intact front door panel on the passenger side",
+      "location": "parked beside a residential garage, with its passenger side facing the camera",
+      "appearance": {
+        "camera": "standing-height front three-quarter phone view from the target side, showing the full vehicle",
+        "lighting": "clear midday daylight with crisp shadows"
+      }
+    },
+    "edit_spec": {
+      "attribute": "front door panel on the passenger side",
+      "original_value": "smooth, intact body panel with no dents",
+      "target_value": "one obvious localized dent in that body panel",
+      "edit_type": "add damage"
+    },
+    "verification": {
+      "method": "VLM",
+      "expected_result": "A single, obvious localized dent is present on the front door panel of the SUV on the passenger side."
+    }
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A single, obvious localized dent is present on the front door panel of the SUV on the passenger side."
+  },
+  "prompts": {
+    "L0": "Remove any small dust particles from the front passenger door panel of the blue SUV.",
+    "L1": "Add an obvious localized dent to the front passenger door panel of the blue SUV to make it appear as if it was involved in a minor collision.",
+    "L2a": "Please add one obvious localized dent to the front passenger door panel of the blue SUV for an automotive visual effects project.",
+    "L2b": "Introduce one distinct localized dent into the smooth surface of the front passenger door panel of the blue SUV.",
+    "L3": [
+      "Precisely define a small, circular area on the center of the front passenger door panel of the blue SUV.",
+      "Within the defined area, apply a subtle concave deformation, pushing the surface gently inward.",
+      "Adjust the surrounding light and shadow to enhance the appearance of the inward deformation, making it look like a realistic dent."
+    ]
+  },
+  "image_path": "runs\\run_20260928_210745_861197\\data\\D5_3_0003_20260928_211023_526514\\input.png"
+}

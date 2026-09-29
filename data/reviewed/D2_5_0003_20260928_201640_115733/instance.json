@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A white paper coupon for 'Local Cafe', with a simple graphic border, 'SPECIAL OFFER' at the top, and a prominent '10% OFF' discount value in the center.",
+    "location": "on a plain wooden tabletop, entirely visible and unobstructed",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft, natural daylight"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "10% OFF",
+    "target_value": "50% OFF",
+    "edit_type": "text modification"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  }
+}

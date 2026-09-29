@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "5.3",
+  "scene_spec": {
+    "scene_type": "hatchback in an office parking lot",
+    "object": "A blue hatchback with a smooth, intact front door panel on the visible side.",
+    "location": "parked in an office parking lot, with the driver's side facing the camera.",
+    "appearance": {
+      "camera": "standing-height front three-quarter phone view from the target side, showing the full vehicle",
+      "lighting": "clear midday daylight with crisp shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "front door panel on the visible side",
+    "original_value": "smooth, intact body panel with no dents",
+    "target_value": "one obvious localized dent in that body panel",
+    "edit_type": "add damage"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A single localized dent is visible on the front door panel of the blue hatchback, with no other changes to the vehicle or scene."
+  }
+}

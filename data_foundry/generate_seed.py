@@ -86,7 +86,7 @@ def generate_cases(image_model, prompt_model, counts, use_reviewed=True):
             case_id = (
                 selected[subcategory][index]["case_id"]
                 if use_reviewed
-                else f"D{subcategory.replace('.', '_')}_{index:04d}"
+                else f"D{subcategory.replace('.', '_')}_{index:04d}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
             )
             case_dir = run_dir / "data" / case_id
             case_dir.mkdir(parents=True)
