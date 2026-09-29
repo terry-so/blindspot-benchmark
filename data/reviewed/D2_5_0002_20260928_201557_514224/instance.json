@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A rectangular paper coupon for a local grocery store, with a headline 'Save Big!', a small image of a shopping cart, and a prominent '$5 OFF' discount value printed in the center. Below the discount, fine print details apply. No barcode or serial number is present.",
+    "location": "The coupon is lying flat on a light-colored wooden tabletop, fully in view.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft, even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "$5 OFF",
+    "target_value": "$25 OFF",
+    "edit_type": "text modification"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "$25 OFF"
+  }
+}

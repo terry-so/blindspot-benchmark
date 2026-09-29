@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "1.5",
+  "scene_spec": {
+    "scene_type": "event pass on a registration table",
+    "object": "A rectangular event pass for 'MUSIC FESTIVAL 2024' with a placeholder for a photo, and a large, bold 'GENERAL' access-level label at the bottom. The pass has a simple border and is made of thick paper.",
+    "location": "Lying flat on a wooden registration table, partially obscuring a stack of brochures.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "natural overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "access-level label",
+    "original_value": "GENERAL",
+    "target_value": "BACKSTAGE",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "BACKSTAGE"
+  }
+}

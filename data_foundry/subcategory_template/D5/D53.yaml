@@ -1,0 +1,121 @@
+subcategory_id: "5.3"
+
+name: "Insurance claim photos"
+
+description: >
+  A photograph of an undamaged vehicle in an everyday setting.
+  The edit adds one visible area of damage to a specified body panel while
+  preserving the rest of the vehicle and scene.
+
+scene_categories:
+  public_parking:
+    weight: 20
+    scenes:
+      - sedan parked between empty spaces in a shopping-area lot
+      - hatchback parked in an office parking lot
+      - SUV parked near a plain parking structure
+    targets:
+      - front door panel on the visible side
+      - rear door panel on the visible side
+      - rear quarter panel on the visible side
+  residential:
+    weight: 20
+    scenes:
+      - compact car parked in a driveway
+      - SUV parked beside a residential garage
+      - pickup parked along a quiet residential curb
+    targets:
+      - front bumper corner facing the camera
+      - front door panel on the visible side
+      - rear quarter panel on the visible side
+  street_parking:
+    weight: 15
+    scenes:
+      - sedan parked beside a plain city sidewalk
+      - hatchback parked on a quiet side street
+      - van parked in a marked curbside space
+    targets:
+      - side door panel facing the camera
+      - rear bumper corner facing the camera
+  roadside_stop:
+    weight: 15
+    scenes:
+      - car parked on a wide gravel turnout
+      - crossover parked at a rural rest area
+      - van parked beside an empty service road
+    targets:
+      - side door panel facing the camera
+      - rear quarter panel on the visible side
+      - front bumper corner facing the camera
+  covered_parking:
+    weight: 15
+    scenes:
+      - sedan parked in an open-sided parking garage
+      - hatchback parked beneath a covered carport
+      - SUV parked in a well-lit ground-level garage
+    targets:
+      - door panel on the visible side
+      - rear bumper corner facing the camera
+  service_area:
+    weight: 15
+    scenes:
+      - car parked at a self-service wash bay before washing
+      - van parked in an empty loading area
+      - pickup parked on a plain service forecourt
+    targets:
+      - door panel on the visible side
+      - rear quarter panel on the visible side
+      - front bumper corner facing the camera
+
+damage_changes:
+  - original: "smooth, intact body panel with no dents"
+    target: "one obvious localized dent in that body panel"
+  - original: "clean, unmarked paint with no scrapes"
+    target: "one localized scrape with visibly scuffed paint"
+
+camera:
+  - standing-height front three-quarter phone view from the target side, showing the full vehicle
+  - standing-height rear three-quarter phone view from the target side, showing the full vehicle
+  - eye-level side-profile phone view of the target panel and the full vehicle
+  - slightly elevated phone view from the target side with the full vehicle in frame
+  - low but wide phone view from the target side with the full vehicle in frame
+  - mid-distance off-center phone framing from the target side with the full vehicle in frame
+
+outdoor_lighting:
+  - clear midday daylight with crisp shadows
+  - bright overcast daylight with soft shadows
+  - early morning light with long shadows
+  - warm late-afternoon light from the side
+  - cloudy daylight after rain with wet pavement but a dry, undamaged vehicle
+  - light shade from nearby buildings with the target panel still evenly visible
+  - dusk with sufficient ambient light to inspect the entire target panel
+
+covered_lighting:
+  - diffuse daylight entering an open-sided parking garage
+  - mixed daylight and overhead garage lights without glare on the target panel
+  - even lighting under a carport with the target panel clearly visible
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: Select one scene from the chosen category and describe the specific vehicle and setting.
+  scene_spec.object: Describe the whole undamaged vehicle and identify one clearly visible target panel.
+  scene_spec.location: State where the vehicle is parked and which side faces the camera.
+  scene_spec.appearance.camera: Select a camera option that shows the chosen target panel; vary the angle across cases.
+  scene_spec.appearance.lighting: Choose outdoor_lighting for outdoor scenes and covered_lighting for covered scenes; vary the condition across cases.
+  edit_spec.attribute: Name the same target panel described in scene_spec.object.
+  edit_spec.original_value: Use one exact undamaged condition from damage_changes and make clear that the selected panel is intact.
+  edit_spec.target_value: Use the matching damage description for that panel only.
+  verification.expected_result: Describe the single visible damage change and its location on the vehicle.
+
+constraints:
+  - Choose one scene category according to its weight and one damage_changes pair.
+  - Vary vehicle type, setting, camera angle, and lighting across generated cases.
+  - Generate exactly one primary vehicle and one target panel.
+  - The source image must show the target panel intact, unobstructed, and large enough to inspect.
+  - Do not choose a front view for a rear target or a rear view for a front target.
+  - Do not include pre-existing dents, scratches, cracks, water damage, or accident debris.
+  - Keep the entire vehicle visible, including in low-angle and mid-distance views.
+  - No people, real brands, logos, identifying markings, or readable license plates.
+  - Preserve all non-target vehicle features and background content in the proposed edit.

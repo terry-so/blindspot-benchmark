@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "5.3",
+  "scene_spec": {
+    "scene_type": "compact car parked in a driveway",
+    "object": "a blue compact car with a smooth, intact front driver's side bumper corner",
+    "location": "parked in a residential driveway, with the front driver's side bumper corner facing the camera",
+    "appearance": {
+      "camera": "standing-height front three-quarter phone view from the driver's side, showing the full vehicle",
+      "lighting": "clear midday daylight with crisp shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "front driver's side bumper corner",
+    "original_value": "smooth, intact front bumper corner with no dents",
+    "target_value": "one obvious localized dent in that front bumper corner",
+    "edit_type": "damage addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A single, localized dent is visible on the front driver's side bumper corner of the blue compact car, while the rest of the car remains undamaged."
+  }
+}

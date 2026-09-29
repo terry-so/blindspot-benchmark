@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "completed declaration form",
+    "object": "A fully visible declaration form with a heading 'DECLARATION OF CONSENT', body text detailing terms, a 'Declarant Name' field filled with 'John Doe', a 'Date' field filled with '2023-10-26', and a 'Witness' field filled with 'Jane Smith'. The bottom left corner of the form, designated for official seals, is currently blank.",
+    "location": "The entire declaration form is laid flat on a neutral background, centered in the photograph with its edges parallel to the frame.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "official seal",
+    "original_value": "The declaration form contains all specified content, including the heading 'DECLARATION OF CONSENT', body text, and filled fields for 'Declarant Name: John Doe', 'Date: 2023-10-26', and 'Witness: Jane Smith'. The position for the official seal in the bottom left corner is empty.",
+    "target_value": "A circular ink notary seal is added to the bottom left corner of the declaration form, displaying text such as 'NOTARY PUBLIC - STATE OF EXAMPLE' and a non-functional ID 'TEST-0007'.",
+    "edit_type": "addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "The declaration form now displays a circular ink notary seal in its bottom left corner, confirming the presence of the 'NOTARY PUBLIC - STATE OF EXAMPLE TEST-0007' mark, while all other document content remains unchanged."
+  }
+}

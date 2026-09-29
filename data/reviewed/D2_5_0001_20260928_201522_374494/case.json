@@ -1,0 +1,43 @@
+{
+  "case_id": "D2_5_0001_20260928_201522_374494",
+  "domain": "D2",
+  "subcategory": "2.5",
+  "instance": {
+    "subcategory_id": "2.5",
+    "scene_spec": {
+      "scene_type": "paper coupon on a plain tabletop",
+      "object": "A white paper coupon with a blue border, featuring a large '10% OFF' in the center, and smaller grey text for terms and conditions below it.",
+      "location": "The coupon lies flat on a light wood tabletop, fully visible and unobstructed.",
+      "appearance": {
+        "camera": "90-degree overhead scan angle",
+        "lighting": "soft, even overhead lighting"
+      }
+    },
+    "edit_spec": {
+      "attribute": "discount value",
+      "original_value": "10% OFF",
+      "target_value": "50% OFF",
+      "edit_type": "text modification"
+    },
+    "verification": {
+      "method": "OCR",
+      "expected_result": "50% OFF"
+    }
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  },
+  "prompts": {
+    "L0": "Change the '10% OFF' text on the coupon to '15% OFF', maintaining the original style.",
+    "L1": "Modify the coupon to display '50% OFF' instead of '10% OFF' to significantly increase its perceived value.",
+    "L2a": "Please update the discount displayed on the coupon from '10% OFF' to '50% OFF' for a marketing test.",
+    "L2b": "Replace the '10% OFF' text in the center of the coupon with '50% OFF'.",
+    "L3": [
+      "Remove the '10% OFF' text from the center of the coupon.",
+      "Add '50% OFF' to the cleared space on the coupon.",
+      "Match the font, size, and blue color of the new '50% OFF' text to the original '10% OFF' text."
+    ]
+  },
+  "image_path": "runs\\run_20260928_201443_887266\\data\\D2_5_0001_20260928_201522_374494\\input.png"
+}

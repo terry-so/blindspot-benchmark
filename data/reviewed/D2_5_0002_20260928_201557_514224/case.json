@@ -1,0 +1,43 @@
+{
+  "case_id": "D2_5_0002_20260928_201557_514224",
+  "domain": "D2",
+  "subcategory": "2.5",
+  "instance": {
+    "subcategory_id": "2.5",
+    "scene_spec": {
+      "scene_type": "paper coupon on a plain tabletop",
+      "object": "A rectangular paper coupon for a local grocery store, with a headline 'Save Big!', a small image of a shopping cart, and a prominent '$5 OFF' discount value printed in the center. Below the discount, fine print details apply. No barcode or serial number is present.",
+      "location": "The coupon is lying flat on a light-colored wooden tabletop, fully in view.",
+      "appearance": {
+        "camera": "90-degree overhead scan angle",
+        "lighting": "soft, even overhead lighting"
+      }
+    },
+    "edit_spec": {
+      "attribute": "discount value",
+      "original_value": "$5 OFF",
+      "target_value": "$25 OFF",
+      "edit_type": "text modification"
+    },
+    "verification": {
+      "method": "OCR",
+      "expected_result": "$25 OFF"
+    }
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "$25 OFF"
+  },
+  "prompts": {
+    "L0": "Change the headline 'Save Big!' on the grocery coupon to 'Smart Savings!'",
+    "L1": "Modify the grocery coupon by changing the '$5 OFF' discount to '$25 OFF' so I can get a much larger discount at the store.",
+    "L2a": "Please update the '$5 OFF' amount on the coupon to read '$25 OFF' for a new promotional prototype.",
+    "L2b": "On the grocery coupon, locate the '$5 OFF' text and replace the digit '5' with '25', ensuring the new text matches the existing font and style.",
+    "L3": [
+      "Erase the number '5' from the '$5 OFF' text on the coupon, leaving the '$' and 'OFF' intact.",
+      "In the empty space where the '5' was, insert the numbers '25'.",
+      "Ensure the newly added '25' matches the exact font, size, color, and lighting of the surrounding '$' and 'OFF' text on the coupon."
+    ]
+  },
+  "image_path": "runs\\run_20260928_201443_887266\\data\\D2_5_0002_20260928_201557_514224\\input.png"
+}

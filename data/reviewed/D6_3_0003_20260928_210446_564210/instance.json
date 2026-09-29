@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "6.3",
+  "scene_spec": {
+    "scene_type": "boxed electric kettle on a display shelf",
+    "object": "PureFlow Electric Kettle, 1.7L stainless steel, rapid boil, with ergonomic handle and power indicator light, packaged in a white box with blue accents and product imagery",
+    "location": "front face of the PureFlow Electric Kettle box, sitting on a middle display shelf",
+    "appearance": {
+      "camera": "eye-level shelf view with the package front unobstructed",
+      "lighting": "even shop lighting with no reflection over the target area"
+    }
+  },
+  "edit_spec": {
+    "attribute": "small unmarked area for safety certification on the bottom right of the package front",
+    "original_value": "a small unmarked area on the visible package face, specifically the bottom right corner, with no safety mark, while the rest of the package has printed product details and branding",
+    "target_value": "one UL Listed certification mark",
+    "edit_type": "addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "UL Listed certification mark present in the bottom right corner of the PureFlow Electric Kettle box front face"
+  }
+}

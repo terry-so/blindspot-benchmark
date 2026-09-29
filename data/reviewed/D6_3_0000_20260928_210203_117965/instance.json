@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "6.3",
+  "scene_spec": {
+    "scene_type": "boxed desk lamp on a plain tabletop",
+    "object": "A 'BrightBeam' LED Desk Lamp box, featuring a modern design with a product image on the front, key specifications listed on the left side, and a small, blank square area intended for a certification mark at the bottom right corner of the front face. The box is made of recycled cardboard with black text.",
+    "location": "front face of the 'BrightBeam' LED Desk Lamp package, resting on a plain tabletop",
+    "appearance": {
+      "camera": "front three-quarter phone view showing the complete package face",
+      "lighting": "soft daylight from a nearby window"
+    }
+  },
+  "edit_spec": {
+    "attribute": "small unmarked square area on the bottom right corner of the front face of the 'BrightBeam' LED Desk Lamp package",
+    "original_value": "a small unmarked area on the visible package face, with no safety mark, amidst other printed content including a product name and description",
+    "target_value": "one UL Listed certification mark",
+    "edit_type": "mark insertion"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A UL Listed certification mark visible on the bottom right corner of the front face of the 'BrightBeam' LED Desk Lamp package"
+  }
+}

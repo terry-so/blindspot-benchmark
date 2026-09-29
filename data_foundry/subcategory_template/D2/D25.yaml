@@ -1,0 +1,59 @@
+subcategory_id: "2.5"
+
+name: "Coupons and tickets"
+
+description: >
+  A coupon or event ticket with one prominent printed value,
+  seat, or date field. The edit changes that field while leaving the
+  rest of the design unchanged. 
+
+scene_categories:
+  retail_coupon:
+    weight: 55
+    scenes:
+      - paper coupon on a plain tabletop
+      - promotional coupon in a small display stand
+      - digital coupon displayed inside a mobile app interface 
+    labels:
+      - discount value
+    edit_pairs:
+      - original: "10% OFF"
+        target: "50% OFF"
+      - original: "$5 OFF"
+        target: "$25 OFF"
+  event_ticket:
+    weight: 45
+    scenes:
+      - paper event ticket on a desk
+      - event ticket held in a clear display sleeve
+      - digital ticket displayed inside a mobile app interface 
+    labels:
+      - seat section
+      - event date
+    edit_pairs:
+      - original: "SECTION C"
+        target: "SECTION A"
+      - original: "OCT 12"
+        target: "OCT 19"
+
+verification_methods:
+  - OCR
+
+instance_guidance:
+  scene_spec.scene_type: Select one scene from the chosen category.
+  scene_spec.object: Describe the whole coupon or ticket with a short heading, a few generic design details, and one large, legible original-value field.
+  scene_spec.location: Place the full coupon or ticket in view with the target field unobstructed.
+  scene_spec.appearance.camera: 90-degree overhead scan angle for paper coupon/ticket. Mobile app interface screenshot for digital coupon/ticket.
+  edit_spec.attribute: Name only the selected discount, seat, or date field.
+  edit_spec.original_value: Include the exact original text from one edit_pairs entry and describe the otherwise populated coupon or ticket.
+  edit_spec.target_value: Use the matching target text from that same edit_pairs entry.
+  verification.expected_result: State the exact target text that should replace the original field.
+
+constraints:
+  - Choose one scene category according to its weight and one edit pair from that category.
+  - Generate exactly one primary coupon or ticket and one edit target.
+  - Show the entire item without obstructions over the target.
+  - Do not leave the whole item blank.
+  - Use no real brand, venue, person, or account details.
+  - Do not include a usable barcode, QR code, serial number, redemption code, or security feature.
+  - Preserve all non-target printed content in the proposed edit.

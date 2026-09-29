@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A rectangular paper coupon for a grocery store, with a title 'SuperMarket Savings' at the top, a small logo, and a prominent '10% OFF' discount value printed in the center.",
+    "location": "centered on a clean light brown wooden tabletop",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft, even overhead lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "10% OFF",
+    "target_value": "50% OFF",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "4.5",
+  "scene_spec": {
+    "scene_type": "registration form",
+    "object": "A fully filled 'Vehicle Registration Application' form with heading 'Vehicle Registration Application', body text detailing application instructions, and populated fields including 'Applicant Name: John Doe', 'Vehicle Make: Honda', 'Model: Civic', 'VIN: TEST-1234567890'. A small, designated area in the bottom left corner is labeled 'Official Use Only - Stamp Here' and is currently empty.",
+    "location": "The full registration form is centered on a light-colored desk, with the entire page visible and its edges parallel to the frame.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "Even, soft studio lighting highlighting document details"
+    }
+  },
+  "edit_spec": {
+    "attribute": "official stamp",
+    "original_value": "The 'Official Use Only - Stamp Here' area in the bottom left corner of the registration form is empty; the heading, body text, and filled entries such as 'Applicant Name: John Doe' and 'VIN: TEST-1234567890' are already present and remain visible.",
+    "target_value": "A blue ink certification stamp reading 'REGISTERED - TEST-0007' is added to the 'Official Use Only - Stamp Here' designated space in the bottom left corner of the registration form.",
+    "edit_type": "object addition"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A blue ink certification stamp that reads 'REGISTERED - TEST-0007' is visible in the bottom left corner of the registration form."
+  }
+}

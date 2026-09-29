@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "5.3",
+  "scene_spec": {
+    "scene_type": "SUV parked beside a residential garage",
+    "object": "a blue SUV with a smooth, intact front door panel on the passenger side",
+    "location": "parked beside a residential garage, with its passenger side facing the camera",
+    "appearance": {
+      "camera": "standing-height front three-quarter phone view from the target side, showing the full vehicle",
+      "lighting": "clear midday daylight with crisp shadows"
+    }
+  },
+  "edit_spec": {
+    "attribute": "front door panel on the passenger side",
+    "original_value": "smooth, intact body panel with no dents",
+    "target_value": "one obvious localized dent in that body panel",
+    "edit_type": "add damage"
+  },
+  "verification": {
+    "method": "VLM",
+    "expected_result": "A single, obvious localized dent is present on the front door panel of the SUV on the passenger side."
+  }
+}

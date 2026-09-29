@@ -68,7 +68,7 @@ def run_benchmark(cases, models, judge, thresholds, levels=("L1",), repeats=1,
                     try:
                         labels = run_case(
                             model, judge, case, level, output_path,
-                            thresholds[model_name],
+                            thresholds,
                         )
                     except Exception as e:
                         labels = {

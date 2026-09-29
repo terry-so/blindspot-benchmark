@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "1.5",
+  "scene_spec": {
+    "scene_type": "event pass hanging from a lanyard",
+    "object": "A rectangular event pass, hanging from a plain black lanyard against a neutral background. The pass has a prominent 'GENERAL ADMISSION' label in bold white text on a blue background, along with generic event graphics like a stylized microphone icon and 'Annual Tech Expo' in smaller text.",
+    "location": "Hanging from a black lanyard, visible against a blurred conference background",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "soft ambient lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "printed admission-level label",
+    "original_value": "GENERAL",
+    "target_value": "BACKSTAGE",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "BACKSTAGE"
+  }
+}

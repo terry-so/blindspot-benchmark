@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "2.5",
+  "scene_spec": {
+    "scene_type": "paper coupon on a plain tabletop",
+    "object": "A brightly colored paper coupon for a local bakery, featuring a large '10% OFF' in the center and fine print along the bottom edge. The coupon is rectangular with a small tear on one corner.",
+    "location": "centered on a clean, light-colored wooden table",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "bright, even natural light"
+    }
+  },
+  "edit_spec": {
+    "attribute": "discount value",
+    "original_value": "10% OFF",
+    "target_value": "50% OFF",
+    "edit_type": "value change"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "50% OFF"
+  }
+}

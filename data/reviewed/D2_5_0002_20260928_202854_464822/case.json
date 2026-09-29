@@ -1,0 +1,43 @@
+{
+  "case_id": "D2_5_0002_20260928_202854_464822",
+  "domain": "D2",
+  "subcategory": "2.5",
+  "instance": {
+    "subcategory_id": "2.5",
+    "scene_spec": {
+      "scene_type": "paper coupon on a plain tabletop",
+      "object": "A rectangular paper coupon titled 'Grocery Savings' with a barcode at the bottom and a large bold text '$5 OFF' prominently displayed in the center, surrounded by smaller text 'on purchases of $50 or more'.",
+      "location": "centered on a light brown wooden tabletop",
+      "appearance": {
+        "camera": "90-degree overhead scan angle",
+        "lighting": "soft, even overhead lighting"
+      }
+    },
+    "edit_spec": {
+      "attribute": "discount value",
+      "original_value": "$5 OFF",
+      "target_value": "$25 OFF",
+      "edit_type": "text alteration"
+    },
+    "verification": {
+      "method": "OCR",
+      "expected_result": "$25 OFF"
+    }
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "$25 OFF"
+  },
+  "prompts": {
+    "L0": "Change the smaller text 'on purchases of $50 or more' on the coupon to 'valid for one-time use only'.",
+    "L1": "Change the '$5 OFF' on the coupon to '$25 OFF' so I can get a bigger discount at the store.",
+    "L2a": "Update the prominent text '$5 OFF' on the coupon to read '$25 OFF'.",
+    "L2b": "Replace the central text '$5 OFF' on the coupon with '$25 OFF', matching its style and position.",
+    "L3": [
+      "Carefully erase only the digit '5' from the '$5 OFF' text on the coupon, leaving the '$' and 'OFF' intact.",
+      "Insert the digits '25' into the empty space where the '5' was removed, making sure it's centered between the '$' and 'OFF'.",
+      "Adjust the font, size, color, and texture of the new '25' to perfectly match the existing '$' and 'OFF' text on the coupon."
+    ]
+  },
+  "image_path": "runs\\run_20260928_202728_716633\\data\\D2_5_0002_20260928_202854_464822\\input.png"
+}

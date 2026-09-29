@@ -1,0 +1,22 @@
+{
+  "subcategory_id": "1.5",
+  "scene_spec": {
+    "scene_type": "event pass on a registration table",
+    "object": "A white rectangular event pass with rounded corners, lying flat on a dark wooden registration table. The pass has a generic event logo at the top, and in the center, a large, bold black text label reads 'GENERAL'. Below this, there's placeholder text like 'Event Name' and 'Date'.",
+    "location": "The event pass is centered on the table, with the 'GENERAL' admission-level label clearly visible and unobstructed.",
+    "appearance": {
+      "camera": "90-degree overhead scan angle",
+      "lighting": "natural lighting"
+    }
+  },
+  "edit_spec": {
+    "attribute": "The printed admission-level label only.",
+    "original_value": "GENERAL",
+    "target_value": "BACKSTAGE",
+    "edit_type": "text replacement"
+  },
+  "verification": {
+    "method": "OCR",
+    "expected_result": "BACKSTAGE"
+  }
+}

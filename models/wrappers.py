@@ -13,6 +13,8 @@ import yaml
 from pydantic import BaseModel
 import re
 import json
+import base64
+import random
 
 """
 ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
@@ -67,27 +69,6 @@ class FluxModel:
         return output_dict
 
 
-
-
-
-
-class OpenAIModel:
-    """
-    OpenAI model wrapper
-    """
-    def __init__(self, model_name: str):
-        self.model_name = model_name
-        self.client = OpenAI()
-
-    def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
-        """
-        Generate edit using OpenAI API and save to output image path.
-        Also return dictionary containing status, text output and edited image.
-        """
-
-        #https://developers.openai.com/api/docs/guides/image-generation?reference-images-api=image#edit-images
-
-        return {"status":"success/failed", "text_response":None, "image":Image.Image, 'error':None }
 
 
 class GeminiModel:
@@ -181,7 +162,21 @@ class GeminiModel:
             with open(yaml_path, "r") as f:
                 data = yaml.load(f, Loader = yaml.SafeLoader)
     
+            categories = data["scene_categories"]
+            category_name, category = random.choices(
+                list(categories.items()),
+                weights=[item["weight"] for item in categories.values()],
+                k=1,
+            )[0]
+            scene = random.choice(category["scenes"])
+
             prompt = prompt.replace("{template}", str(data))
+            prompt += (
+                "\nThe category and scene have already been selected. "
+                "Use these exact choices; do not select another:\n"
+                f"scene_category: {category_name}\n"
+                f"scene: {scene}\n"
+            )
     
             class Appearance(BaseModel):
                 camera: str
@@ -283,8 +278,57 @@ class GeminiModel:
             f"finish_reason={finish_reason!r}, "
             f"text={' '.join(text_parts)!r}"
         )
-                    
 
+class Azure_gpt_image:
+    def __init__(
+        self,
+        model_name="gpt-image-2.5-sunburst-2026-09-08-dfg54",
+    ):
+        self.model_name = model_name
+        self.client = OpenAI(
+            base_url="https://202609-mali-detect.services.ai.azure.com/openai/v1",
+            api_key=os.environ["Azure_API_KEY"],
+        )
+
+    @staticmethod
+    def _image_from_response(response):
+        if not response.data or not response.data[0].b64_json:
+            raise RuntimeError("returned no image")
+        image_bytes = base64.b64decode(response.data[0].b64_json)
+        return Image.open(BytesIO(image_bytes)).convert("RGB")
+
+    def generate_seed_image(self, prompt, output_path):
+        response = self.client.images.generate(
+            model=self.model_name,
+            prompt=prompt,
+            size="1024x1024",
+        )
+        self._image_from_response(response).save(output_path)
+
+    def generate_edit(self, prompt, input_image_path, output_image_path):
+        try:
+            with open(input_image_path, "rb") as source:
+                response = self.client.images.edit(
+                    model=self.model_name,
+                    image=source,
+                    prompt=prompt,
+                )
+
+            image = self._image_from_response(response)
+            image.save(output_image_path)
+            return {
+                "status": "success",
+                "text_response": None,
+                "image": image,
+                "error": None,
+            }
+        except Exception as e:
+            return {
+                "status": "failed",
+                "text_response": None,
+                "image": None,
+                "error": str(e),
+            }
 
 
 
