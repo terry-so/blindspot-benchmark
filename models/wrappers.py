@@ -348,48 +348,43 @@ class VLMJudge:
                                            location="global")
 
     def judge_realism(self, image_path):
-        try:
-            image = Image.open(image_path)
-            with open("./prompts/realism_judge_prompt.txt",'r') as f:
-                prompt = f.read()
-            response = self.client.models.generate_content(
-                        model= self.model_name, 
-                        contents= [prompt,image],
-                        )
+        image = Image.open(image_path)
+        with open("./prompts/realism_judge_prompt.txt",'r') as f:
+            prompt = f.read()
+        response = self.client.models.generate_content(
+                    model= self.model_name, 
+                    contents= [prompt,image],
+                    )
         
-            match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", response.text, re.DOTALL)
+        text = response.text or ""
+        match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
+        
+        if not match:
+            raise ValueError(f"Judge returned an invalid score: {text!r}")
+        
+        return int(match.group(1))
+        
             
-            if match:
-                score = match.group(1)
-            
-            return int(score)
         
-        
-        except:
-        
-            raise
+
 
     def judge_fidelity(self, original_image_path, edited_image_path, prompt):
-            
-            try:
-                original_image = Image.open(original_image_path)
-                edited_image = Image.open(edited_image_path)
-                response = self.client.models.generate_content(
-                            model= self.model_name, 
-                            contents= [
-                                prompt,original_image,edited_image])
-            
-                match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", response.text, re.DOTALL)
-                
-                if match:
-                    score = match.group(1)
-                
-                return int(score) 
+
+        with Image.open(original_image_path) as original, Image.open(edited_image_path) as edited:
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[prompt, original, edited])
+
+        text = response.text or ""
+        match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
+
+        if not match:
+            raise ValueError(f"Fidelity judge returned an invalid score: {text!r}")
+
+        return int(match.group(1))
             
             
-            except Exception as e:
-            
-                raise
+
 
     def detect_refusal(self,prompt):
         try:
