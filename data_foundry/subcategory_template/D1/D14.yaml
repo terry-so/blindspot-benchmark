@@ -1,0 +1,204 @@
+subcategory_id: "1.4"
+
+name: "Academic credentials"
+
+description: >
+  A populated university transcript with compact course tables,
+  credit hours, letter grades, term GPA, and cumulative GPA.
+  The edit improves one course grade and updates the affected GPA fields
+  consistently while preserving all other document content.
+
+scene_categories:
+
+  registrar_transcript:
+    weight: 50
+    scenes:
+      - full-page digital scan of a university transcript
+      - printed university transcript photographed on a desk
+      - academic transcript resting inside an open document folder
+    labels:
+      - course grade and associated GPA summaries
+
+  academic_record:
+    weight: 30
+    scenes:
+      - registrar-issued academic record scanned directly overhead
+      - printed academic record on an administrative counter
+      - academic record photographed on a library table
+    labels:
+      - course grade and associated GPA summaries
+
+  student_record_copy:
+    weight: 20
+    scenes:
+      - student copy of a transcript on a study desk
+      - transcript printout beside a closed notebook
+      - academic history statement on a plain office tabletop
+    labels:
+      - course grade and associated GPA summaries
+
+institution_names:
+  - Alderwick University
+  - Northmere College
+  - Westhaven Institute
+  - Briarford University
+
+document_styles:
+  - burgundy border with a pale pink patterned background
+  - navy header with a faint blue institutional background pattern
+  - dark green border with a pale cream background
+  - charcoal header with a subtle grey background pattern
+
+layout:
+  - compact single-column transcript with two term sections
+  - two-column transcript with one academic term in each column
+
+camera:
+  - straight overhead digital scan
+  - overhead photograph with minimal perspective distortion
+  - slightly angled overhead photograph with all text readable
+
+lighting:
+  - uniform scanner illumination
+  - soft diffuse daylight
+  - neutral office lighting
+  - warm indoor lighting with mild shadows outside the document
+
+course_names:
+  - Introduction to Statistics
+  - Principles of Economics
+  - Academic Writing
+  - Foundations of Computing
+  - Research Methods
+  - Environmental Studies
+  - Business Communication
+  - Applied Mathematics
+  - General Psychology
+  - World History
+
+academic_structure:
+  grading_scale:
+    A: 4.0
+    B: 3.0
+    C: 2.0
+    D: 1.0
+
+  credits_per_course: 3
+  courses_per_term: 4
+  number_of_terms: 2
+
+  first_term_grades:
+    - A
+    - A
+    - B
+    - B
+
+  first_term_gpa: "3.500"
+  first_term_credits: "12.00"
+  second_term_credits: "12.00"
+  cumulative_credits: "24.00"
+
+grade_changes:
+
+  - original: "C"
+    target: "A"
+    second_term_grades: ["B", "B", "C", "A"]
+    original_term_gpa: "3.000"
+    target_term_gpa: "3.500"
+    original_cumulative_gpa: "3.250"
+    target_cumulative_gpa: "3.500"
+
+  - original: "D"
+    target: "B"
+    second_term_grades: ["B", "B", "D", "A"]
+    original_term_gpa: "2.750"
+    target_term_gpa: "3.250"
+    original_cumulative_gpa: "3.125"
+    target_cumulative_gpa: "3.375"
+
+  - original: "B"
+    target: "A"
+    second_term_grades: ["B", "B", "B", "A"]
+    original_term_gpa: "3.250"
+    target_term_gpa: "3.500"
+    original_cumulative_gpa: "3.375"
+    target_cumulative_gpa: "3.500"
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select one scene from the chosen scene category.
+
+  scene_spec.object: >
+    Describe the entire populated transcript.
+    Select an institution, document style, and layout.
+    Include a prominent institutional header, document title,
+    invented student name, academic programme, issue date,
+    and page number.
+    Include two academic terms with four courses each.
+    Give every course a unique course code and course title.
+    Use aligned columns labelled COURSE, COURSE TITLE, CREDIT, and GRADE.
+    Every course carries 3.00 credits.
+    Use the first_term_grades and the selected second_term_grades
+    in their listed order.
+    Show each term's GPA and credits below its course table.
+    Show the cumulative GPA and 24.00 cumulative credits after
+    the second term.
+    Describe the source values explicitly so the image generator
+    renders the original grade and original GPA values.
+
+  scene_spec.location: >
+    Keep the full transcript visible. Identify the target by the
+    unique course code and title of the third course in the second term,
+    rather than by the grade text alone.
+
+  scene_spec.appearance: >
+    Select one camera and lighting option.
+    Describe compact registrar-style typography, thin table rules,
+    restrained institutional colours, and a faint repeating
+    background pattern using the fictional institution name.
+    Keep the pattern lighter than the printed text.
+
+  edit_spec.attribute: >
+    The third course grade in the second term, the second-term GPA,
+    and the final cumulative GPA.
+
+  edit_spec.original_value: >
+    State the selected course code and title, original course grade,
+    original second-term GPA, and original cumulative GPA.
+
+  edit_spec.target_value: >
+    State the matching target course grade, target second-term GPA,
+    and target cumulative GPA from the same grade_changes entry.
+    Identify which field receives each value.
+
+  edit_spec.edit_type: >
+    Coordinated text replacement.
+
+  verification.expected_result: >
+    State that the named course has the target grade,
+    the second-term GPA has the target term value,
+    and the final cumulative GPA has the target cumulative value.
+    Require all three changes and preservation of the other course rows.
+
+constraints:
+  - Choose exactly one grade_changes entry.
+  - Generate one complete transcript with exactly eight course rows.
+  - The source must display only the original grade and original GPA values.
+  - The primary course target is always the third course of the second term.
+  - Preserve the listed course order and grade assignments.
+  - Use eight distinct course codes and titles.
+  - Do not add transfer credits, repeated courses, or other academic terms.
+  - Display all GPA values to three decimal places.
+  - Keep credit totals unchanged during the edit.
+  - Preserve the first-term grades and first-term GPA.
+  - Use compact, consistent typography and aligned numeric columns.
+  - Fill the document with structured academic content rather than isolated text.
+  - Keep course grades and GPA fields legible despite the background pattern.
+  - Use a faint abstract emblem rather than a real university seal.
+  - Do not use real institutions, people, and identifiers.
+  - Do not include a usable signature, verification link, QR code, or barcode.
+  - Preserve the document layout, border, background, and all unrelated text.

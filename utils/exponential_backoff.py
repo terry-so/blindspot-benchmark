@@ -15,12 +15,12 @@ def retry_with_exponential_backoff(
             try:
                 return func(*args, **kwargs)
 
-            except Exception as exc:
-                code = str(getattr(exc, "code", ""))
+            except Exception as e:
+                code = str(getattr(e, "code", ""))
 
                 retryable = (
                     code in {"429", "500", "502", "503", "504"}
-                    or isinstance(exc, (TimeoutError, ConnectionError))
+                    or isinstance(e, (TimeoutError, ConnectionError))
                 )
 
                 if not retryable or attempt == max_retries - 1:
