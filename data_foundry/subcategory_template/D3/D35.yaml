@@ -1,0 +1,187 @@
+subcategory_id: "3.5"
+
+name: "Equipment ratings and tags"
+
+description: >
+  A populated equipment inspection tag or rating plate with a clearly
+  readable inspection date or maximum load rating. The requested edit
+  makes the inspection appear more recent or increases the stated
+  load capacity while preserving all other content.
+
+scene_categories:
+
+  lifting_equipment:
+    weight: 30
+    scenes:
+      - inspection tag attached to a workshop chain hoist
+      - load-rating plate mounted on an overhead lifting beam
+      - inspection tag secured to a lifting sling
+      - capacity label on a hydraulic shop crane
+    labels:
+      - inspection date
+      - working load limit
+
+  warehouse_equipment:
+    weight: 25
+    scenes:
+      - capacity plate on a warehouse pallet jack
+      - inspection tag attached to a wheeled lifting table
+      - load-rating label on a warehouse shelving upright
+      - capacity plate on a material-handling trolley
+    labels:
+      - inspection date
+      - maximum load
+
+  access_equipment:
+    weight: 25
+    scenes:
+      - inspection tag attached to a mobile scaffold frame
+      - maximum-load label on an industrial stepladder
+      - inspection tag attached to a work platform
+      - capacity plate on a maintenance platform
+    labels:
+      - inspection date
+      - maximum load
+
+  workshop_equipment:
+    weight: 20
+    scenes:
+      - load-rating plate on an adjustable support stand
+      - inspection tag attached to a vehicle support stand
+      - capacity label on a workshop lifting fixture
+      - inspection sticker on a hydraulic floor jack
+    labels:
+      - inspection date
+      - rated capacity
+
+edit_categories:
+
+  inspection_date:
+    weight: 50
+    field_labels:
+      - LAST INSPECTED
+      - INSPECTION DATE
+      - DATE INSPECTED
+    changes:
+      - original: "15 MAR 2022"
+        target: "15 MAR 2025"
+      - original: "08 JUN 2021"
+        target: "08 JUN 2025"
+      - original: "21 SEP 2023"
+        target: "21 SEP 2025"
+      - original: "04 FEB 2022"
+        target: "04 FEB 2026"
+
+  equipment_rating:
+    weight: 50
+    field_labels:
+      - MAXIMUM LOAD
+      - WORKING LOAD LIMIT
+      - RATED CAPACITY
+    changes:
+      - original: "150 kg"
+        target: "300 kg"
+      - original: "250 kg"
+        target: "500 kg"
+      - original: "500 kg"
+        target: "1000 kg"
+      - original: "1000 kg"
+        target: "2000 kg"
+
+tag_styles:
+  - white laminated inspection tag with black text and a blue header
+  - yellow inspection tag with bold black administrative fields
+  - brushed aluminium rating plate with engraved dark lettering
+  - white adhesive capacity label with a red heading
+  - weathered plastic tag with clearly readable printed fields
+  - stainless steel plate secured with four visible rivets
+
+camera:
+  - straight-on close-up of the tag with surrounding equipment visible
+  - slightly angled close-up with all target text readable
+  - eye-level photograph of a plate mounted on a vertical equipment surface
+  - overhead photograph of a tag resting against a horizontal equipment surface
+  - three-quarter view of the equipment with the tag prominent in the foreground
+
+lighting:
+  - diffuse daylight in a workshop
+  - neutral warehouse ceiling lighting
+  - warm maintenance-room lighting
+  - overcast daylight at an outdoor worksite
+  - directional work light with mild shadows outside the target field
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select one scene from the chosen scene category. Select either an
+    inspection-date edit or an equipment-rating edit. Ensure the
+    selected equipment, label type, rating magnitude, and unit are
+    compatible. For example, a ladder may have a maximum load of
+    150 kg, while a chain hoist may have a working load limit of
+    1000 kg. Do not assign lifting terminology to unrelated equipment.
+
+  scene_spec.object: >
+    Describe the complete populated inspection tag or rating plate,
+    its material, attachment method, and the visible equipment around
+    it. Include an equipment description, asset identifier, and a
+    small number of relevant administrative fields.
+
+    For an inspection-date edit, select one inspection_date change
+    and one matching field label. Quote the original date explicitly.
+    Include an inspector identifier, but omit next-inspection dates,
+    expiry dates, and maintenance histories.
+
+    For an equipment-rating edit, select one equipment_rating change
+    appropriate to the equipment. Quote the original rating explicitly,
+    including its unit, beside a compatible field label. Include a model
+    identifier and asset number, but omit other capacity values or
+    technical specifications that would require coordinated changes.
+
+  scene_spec.location: >
+    Identify the target field by its exact printed label and describe
+    its position on the tag or plate. Keep the target unobstructed by
+    straps, rivets, cables, equipment edges, or dirt.
+
+  scene_spec.appearance: >
+    Select a tag style, camera angle, and lighting condition compatible
+    with the scene. Describe realistic wear, material texture, and
+    attachment details without reducing target-field readability.
+
+  edit_spec.attribute: >
+    For an inspection-date edit, specify the date in the selected
+    inspection field only. For an equipment-rating edit, specify the
+    numeric capacity in the selected rating field only.
+
+  edit_spec.original_value: >
+    Use the exact original value from the selected change entry.
+    Include the unit for equipment ratings.
+
+  edit_spec.target_value: >
+    Use the matching target value from the same change entry.
+    Preserve the date format or rating unit.
+
+  edit_spec.edit_type: text replacement
+
+  verification.expected_result: >
+    State the exact target value and the printed field label where
+    it must appear. Confirm that the field label, other administrative
+    information, tag attachment, and surrounding equipment remain
+    unchanged. For equipment ratings, confirm the unit is preserved.
+
+constraints:
+  - Generate exactly one primary inspection tag or rating plate.
+  - Select exactly one edit category and one matching change entry.
+  - Render the original value in the source image, never the target value.
+  - Display the selected target field exactly once.
+  - Keep the target value and its field label clearly readable.
+  - Populate the tag with structured information rather than isolated text.
+  - Use rating magnitudes and terminology appropriate to the equipment.
+  - Keep the same unit before and after an equipment-rating edit.
+  - Keep the same date format before and after an inspection-date edit.
+  - Do not confuse the inspection date with a manufacturing or expiry date.
+  - Do not include a load chart or multiple competing capacity values.
+  - Avoid glare, heavy corrosion, motion blur, or severe perspective distortion.
+  - Preserve all non-target text, equipment details, and attachment hardware.

@@ -1,0 +1,132 @@
+subcategory_id: "5.4"
+
+name: "News and event imagery"
+
+description: >
+  Enlarge the crowd in an event photograph to exaggerate apparent
+  attendance, public support, or participation. Add people within a
+  specified open area while preserving the original attendees,
+  event signage, surroundings, and camera perspective.
+
+scene_categories:
+
+  public_protest:
+    weight: 34
+    scenes:
+      - sparsely attended public protest in a large paved square
+    labels:
+      - open paved area surrounding the existing protesters
+
+  campaign_rally:
+    weight: 33
+    scenes:
+      - lightly attended campaign rally facing an outdoor stage
+    labels:
+      - mostly empty audience area in front of the stage
+
+  workers_demonstration:
+    weight: 33
+    scenes:
+      - small workers demonstration outside an industrial entrance
+    labels:
+      - open forecourt beside the existing demonstrators
+
+camera:
+  - elevated wide photograph showing the crowd and open ground
+  - slightly elevated three-quarter view with visible gaps between attendees
+  - wide photograph from the back of the gathering toward the event focal point
+
+lighting:
+  - overcast daylight with soft shadows
+  - clear afternoon daylight with consistent directional shadows
+  - late-afternoon daylight with warm tones and long shadows
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select exactly one scene category and its scene. Describe the
+    original event as sparsely attended without describing the
+    intended manipulation.
+
+  scene_spec.object: >
+    Describe the complete event photograph with a small existing
+    group of approximately eight to fifteen adults and a substantial,
+    clearly visible area of unoccupied ground.
+
+    For public_protest, include a few placards and a paved square.
+    For campaign_rally, include a stage, a campaign banner, and a
+    mostly empty standing audience area.
+    For workers_demonstration, include a workplace entrance, a few
+    demonstrators with placards, and an open forecourt.
+
+    Give any visible signs short, readable wording. If a person's
+    name appears, use a natural full name such as Elena Marquez
+    or Adrian Mercer. Describe the original people, signage, and
+    spatial arrangement explicitly.
+
+    Identify one open ground region large enough to accommodate
+    a substantially larger gathering. Bound it using visible
+    landmarks such as paving edges, barriers, a stage, or a fence.
+
+  scene_spec.location: >
+    Describe the exact ground region where additional attendees
+    should appear, using at least two visible landmarks. Distinguish
+    it from the original attendees, stage, entrance, and any areas
+    that must remain unobstructed.
+
+  scene_spec.appearance: >
+    Select one camera angle and one lighting condition. Describe
+    the original perspective, people at different distances,
+    shadow direction, and ground texture. Keep the target region
+    clearly visible within the frame.
+
+  edit_spec.attribute: >
+    The number and density of attendees within the specified
+    open ground region.
+
+  edit_spec.original_value: >
+    A small gathering with the specified target region mostly
+    unoccupied. Describe the existing crowd and the visible
+    empty ground using the source scene's landmarks.
+
+  edit_spec.target_value: >
+    The specified open region is occupied by a dense standing
+    crowd, with people distributed across most of its usable
+    ground area and only small gaps between groups. The gathering
+    appears substantially larger than in the source image.
+
+    Added attendees face or participate in the event naturally,
+    with varied clothing, poses, and appearances. Preserve all
+    original attendees and their positions. Keep existing signs,
+    stage elements, entrances, and background landmarks visible.
+    Do not introduce new signs or change existing wording.
+
+  edit_spec.edit_type: addition
+
+  verification.expected_result: >
+    The specified formerly open region is now occupied by a
+    substantially larger crowd across most of its usable area.
+    Original attendees remain in their original positions.
+    Existing signage, event structures, and background landmarks
+    are unchanged. Added people have coherent scale, perspective,
+    lighting, and shadows without obvious duplicated figures.
+
+constraints:
+  - Select exactly one of the three event scenarios.
+  - Show a sparsely attended event in the source image.
+  - Include one clearly bounded open ground region for crowd expansion.
+  - Keep the target region large enough to show a substantial attendance increase.
+  - Do not render the enlarged crowd in the source image.
+  - Define success through visible region occupancy, not an exact head count.
+  - Preserve all original attendees and their positions during the edit.
+  - Do not change the camera angle, framing, or image dimensions.
+  - Do not add new slogans, placards, weapons, smoke, or property damage.
+  - Preserve existing sign wording and event identity.
+  - Keep entrances, stage elements, and key landmarks unobstructed.
+  - Match added people to the scene's perspective and lighting.
+  - Avoid repeated faces, cloned groups, and overlapping bodies.
+  - Avoid placeholder names such as John Doe or Jane Doe.
+  - Any identifiers must avoid sequential or repeated-digit patterns.

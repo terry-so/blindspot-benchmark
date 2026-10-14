@@ -1,11 +1,10 @@
-from openai import OpenAI
-from typing import Any, Optional
+from openai import OpenAI, APIStatusError
+from typing import Any
 import os
 from io import BytesIO
 from PIL import Image
+from pathlib import Path
 import torch
-from transformers import AutoProcessor, AutoModelForMultimodalLM
-from diffusers import Flux2KleinPipeline
 from google import genai
 from google.genai import types
 from google.genai.types import GenerateContentConfig, Modality, Part
@@ -20,106 +19,118 @@ import random
 ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
 """
 
+
 class FluxModel:
     """
     Flux model wrapper
     """
+
     def __init__(self, model_name: str = "black-forest-labs/FLUX.2-klein-4B"):
         self.model_name = model_name
 
         self.torch_dtype = torch.bfloat16
         self.device = "cuda:0"
 
-        
-        self.pipe = Flux2KleinPipeline.from_pretrained(self.model_name, torch_dtype=self.torch_dtype)
+        from diffusers import Flux2KleinPipeline
+
+        self.pipe = Flux2KleinPipeline.from_pretrained(
+            self.model_name, torch_dtype=self.torch_dtype
+        )
         self.pipe.to(self.device)
 
-    def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
+    def generate_edit(
+        self, prompt: str, input_image_path: str, output_image_path: str
+    ) -> dict[str, Any]:
         """
         Generate edit using FLUX.2 and save to output image path.
         Also return dictionary containing status, text response and edited image.
         """
-        output_dict = {"status":"failed", "text_response":None,"image":None, "error":None}
-
+        output_dict = {
+            "status": "failed",
+            "text_response": None,
+            "image": None,
+            "error": None,
+        }
 
         try:
             with torch.inference_mode():
                 img = Image.open(input_image_path).convert("RGB")
                 output = self.pipe(
-                    prompt = prompt,
+                    prompt=prompt,
                     generator=torch.Generator(device=self.device).manual_seed(42),
-                    image = img,
-                    num_inference_steps = 4,
-                    guidance_scale = 1.0
+                    image=img,
+                    num_inference_steps=4,
+                    guidance_scale=1.0,
                 ).images[0]
 
             output.save(output_image_path)
 
-            output_dict['status'] = 'success'
-            output_dict['text_response'] = None
-            output_dict['image'] = output
-            output_dict['error'] = None
+            output_dict["status"] = "success"
+            output_dict["text_response"] = None
+            output_dict["image"] = output
+            output_dict["error"] = None
 
         except Exception as e:
-            output_dict['status'] = 'failed'
-            output_dict['text_response'] = None
-            output_dict['image'] = None
-            output_dict['error'] = str(e)
+            output_dict["status"] = "failed"
+            output_dict["text_response"] = None
+            output_dict["image"] = None
+            output_dict["error"] = str(e)
 
         return output_dict
-
-
 
 
 class GeminiModel:
     """
     Gemini model wrapper
     """
-    def __init__(self, model_name: str, vertexai = True):
+
+    def __init__(self, model_name: str, vertexai=True):
         self.model_name = model_name
-        self.API_key = os.environ.get('GEMINI_API_KEY')
+        self.API_key = os.environ.get("GEMINI_API_KEY")
         if vertexai:
-            self.client = genai.Client(vertexai=True,
-                                    project = 'gen-lang-client-0115168191',
-                                    location="global")
+            self.client = genai.Client(
+                vertexai=True,
+                project=os.environ["GOOGLE_CLOUD_PROJECT"],
+                location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+            )
         else:
-            self.client = genai.Client(api_key = self.API_key)
+            self.client = genai.Client(api_key=self.API_key)
 
-
-    def generate_edit(self, prompt: str, input_image_path: str, output_image_path: str) -> dict[str, Any]:
+    def generate_edit(
+        self, prompt: str, input_image_path: str, output_image_path: str
+    ) -> dict[str, Any]:
         """
         Generate edit using Gemini API and save to output image path.
         Also return dictionary containing status, text output and edited image.
         """
-        output_dict = {"status":"failed", "text_response":None,"image":None, "error":None}
+        output_dict = {
+            "status": "failed",
+            "text_response": None,
+            "image": None,
+            "error": None,
+        }
 
-        with open(input_image_path, 'rb') as f:
+        with open(input_image_path, "rb") as f:
             img_bytes = f.read()
-        response  = self.client.models.generate_content(
-                        model = self.model_name,
-                        contents=[
-                            prompt,
-                            Part.from_bytes(
-                                data=img_bytes,
-                                mime_type="image/png",
-                            ),
-                        ],
-                        config=GenerateContentConfig(
-                            response_modalities=[
-                                Modality.TEXT,
-                                Modality.IMAGE]
-                        ),
-                    )
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=[
+                prompt,
+                Part.from_bytes(
+                    data=img_bytes,
+                    mime_type="image/png",
+                ),
+            ],
+            config=GenerateContentConfig(
+                response_modalities=[Modality.TEXT, Modality.IMAGE]
+            ),
+        )
         feedback = response.prompt_feedback
         block_reason = feedback.block_reason if feedback else None
         candidate = response.candidates[0] if response.candidates else None
         finish_reason = candidate.finish_reason if candidate else None
-        output_dict["block_reason"] = (
-            getattr(block_reason, "value", block_reason)
-        )
-        output_dict["finish_reason"] = (
-            getattr(finish_reason, "value", finish_reason)
-        )
+        output_dict["block_reason"] = getattr(block_reason, "value", block_reason)
+        output_dict["finish_reason"] = getattr(finish_reason, "value", finish_reason)
         safety_reasons = {
             "SAFETY",
             "IMAGE_SAFETY",
@@ -135,108 +146,126 @@ class GeminiModel:
         )
         text_parts = []
         if candidate:
-            content  = candidate.content
+            content = candidate.content
             if content and content.parts:
                 for part in content.parts:
                     if part.text:
                         text_parts.append(part.text)
-        
+
                     if part.inline_data:
                         with open(output_image_path, "wb") as f:
                             f.write(part.inline_data.data)
-        
+
                         output_dict["image"] = Image.open(output_image_path).copy()
-        if len(text_parts) > 0:             
-            output_dict['text_response'] = '\n'.join(text_parts)
+        if len(text_parts) > 0:
+            output_dict["text_response"] = "\n".join(text_parts)
         output_dict["status"] = "success"
 
         return output_dict
-    
-    def generate_seed_instance(self, yaml_path):
-            """
-            Generate edit instance using Gemini API. 
-            Return: JSON format string
-            """
-            with open("data_foundry/prompts/instance_JSON_prompt.txt","r") as f:
-                prompt = f.read()
-            with open(yaml_path, "r") as f:
-                data = yaml.load(f, Loader = yaml.SafeLoader)
-    
-            categories = data["scene_categories"]
-            category_name, category = random.choices(
-                list(categories.items()),
-                weights=[item["weight"] for item in categories.values()],
-                k=1,
-            )[0]
-            scene = random.choice(category["scenes"])
 
-            prompt = prompt.replace("{template}", str(data))
-            prompt += (
-                "\nThe category and scene have already been selected. "
-                "Use these exact choices; do not select another:\n"
-                f"scene_category: {category_name}\n"
-                f"scene: {scene}\n"
-            )
-    
-            class Appearance(BaseModel):
-                camera: str
-                lighting: str
-    
-            class SceneSpec(BaseModel):
-                scene_type: str
-                object: str
-                location: str
-                appearance: Appearance
-    
-            class EditSpec(BaseModel):
-                attribute: str
-                original_value: str
-                target_value: str
-                edit_type: str
-    
-            class Verification(BaseModel):
-                method: str
-                expected_result: str
-    
-            class BenchmarkJSON(BaseModel):
-                subcategory_id: str
-                scene_spec: SceneSpec
-                edit_spec: EditSpec
-                verification: Verification
-    
-            
-            response  = self.client.models.generate_content(
-                            model = self.model_name,
-                            contents = prompt,
-                            config = types.GenerateContentConfig(
-                                                    response_mime_type="application/json",
-                                                    response_schema=BenchmarkJSON,
-                                                ))
-    
-            return response.text
+    def generate_seed_instance(self, yaml_path):
+        """
+        Generate edit instance using Gemini API.
+        Return: JSON format string
+        """
+        with open(
+            "data_foundry/prompts/instance_JSON_prompt.txt", "r", encoding="utf-8"
+        ) as f:
+            prompt = f.read()
+        with open(yaml_path, "r", encoding="utf-8") as f:
+            data = yaml.load(f, Loader=yaml.SafeLoader)
+
+        categories = data["scene_categories"]
+        category_name, category = random.choices(
+            list(categories.items()),
+            weights=[item["weight"] for item in categories.values()],
+            k=1,
+        )[0]
+        scene = random.choice(category["scenes"])
+
+        prompt = prompt.replace("{template}", str(data))
+        prompt += (
+            "\nThe category and scene have already been selected. "
+            "Use these exact choices; do not select another:\n"
+            f"scene_category: {category_name}\n"
+            f"scene: {scene}\n"
+        )
+
+        class Appearance(BaseModel):
+            camera: str
+            lighting: str
+
+        class SceneSpec(BaseModel):
+            scene_type: str
+            object: str
+            location: str
+            appearance: Appearance
+
+        class EditSpec(BaseModel):
+            attribute: str
+            original_value: str
+            target_value: str
+            edit_type: str
+
+        class Verification(BaseModel):
+            method: str
+            expected_result: str
+
+        class BenchmarkJSON(BaseModel):
+            subcategory_id: str
+            scene_spec: SceneSpec
+            edit_spec: EditSpec
+            verification: Verification
+
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=BenchmarkJSON,
+            ),
+        )
+
+        return response.text
 
     def generate_edit_prompt(self, prompt):
-            """
-            Generate edit instance using Gemini API. 
-            Return: JSON format string
-            """
-    
-            class PromptJSON(BaseModel):
-                L0: str
-                L1: str
-                L2A: str
-                L2B: str
-                L3: list[str]
-   
-            response  = self.client.models.generate_content(
-                            model = self.model_name,
-                            contents = prompt,
-                            config = types.GenerateContentConfig(
-                                                    response_mime_type="application/json",
-                                                    response_schema=PromptJSON,
-                                                ))
-            return response.text
-    
+        """
+        Generate edit instance using Gemini API.
+        Return: JSON format string
+        """
+
+        class PromptJSON(BaseModel):
+            L0: str
+            L1: str
+            L2A: str
+            L2B: str
+            L3: list[str]
+
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=PromptJSON,
+            ),
+        )
+        text = response.text
+
+        if not text or not text.strip():
+            feedback = response.prompt_feedback
+            candidate = response.candidates[0] if response.candidates else None
+
+            block_reason = feedback.block_reason if feedback else None
+            finish_reason = candidate.finish_reason if candidate else None
+
+            raise RuntimeError(
+                "Edit-prompt generation returned no text. "
+                f"block_reason={getattr(block_reason, 'value', block_reason)!r}, "
+                f"finish_reason={getattr(finish_reason, 'value', finish_reason)!r}"
+            )
+
+        return text
+
     def generate_seed_image(self, prompt, output_path):
         response = self.client.models.generate_content(
             model=self.model_name,
@@ -255,11 +284,7 @@ class GeminiModel:
         block_reason = getattr(block_reason, "value", block_reason)
         finish_reason = getattr(finish_reason, "value", finish_reason)
 
-        parts = (
-            candidate.content.parts or []
-            if candidate and candidate.content
-            else []
-        )
+        parts = candidate.content.parts or [] if candidate and candidate.content else []
 
         text_parts = []
 
@@ -279,6 +304,7 @@ class GeminiModel:
             f"text={' '.join(text_parts)!r}"
         )
 
+
 class Azure_gpt_image:
     def __init__(
         self,
@@ -286,16 +312,48 @@ class Azure_gpt_image:
     ):
         self.model_name = model_name
         self.client = OpenAI(
-            base_url="https://202609-mali-detect.services.ai.azure.com/openai/v1",
+            base_url=os.environ["AZURE_OPENAI_BASE_URL"],
+            max_retries=0,
             api_key=os.environ["Azure_API_KEY"],
         )
 
     @staticmethod
     def _image_from_response(response):
         if not response.data or not response.data[0].b64_json:
-            raise RuntimeError("returned no image")
+            raise RuntimeError("Returned no image")
+
         image_bytes = base64.b64decode(response.data[0].b64_json)
-        return Image.open(BytesIO(image_bytes)).convert("RGB")
+        with Image.open(BytesIO(image_bytes)) as image:
+            return image.convert("RGB")
+
+    @staticmethod
+    def _safety_block_reason(error):
+        """Return an explicit moderation code, or None."""
+        safety_codes = {
+            "content_policy_violation",
+            "content_filter",
+            "responsibleaipolicyviolation",
+            "moderation_blocked",
+        }
+
+        code = getattr(error, "code", None)
+        if isinstance(code, str) and code.lower() in safety_codes:
+            return code
+
+        body = error.body
+        if not isinstance(body, dict):
+            return None
+
+        body = body.get("error", body)
+
+        while isinstance(body, dict):
+            code = body.get("code")
+            if isinstance(code, str) and code.lower() in safety_codes:
+                return code
+
+            body = body.get("innererror") or body.get("inner_error")
+
+        return None
 
     def generate_seed_image(self, prompt, output_path):
         response = self.client.images.generate(
@@ -306,6 +364,16 @@ class Azure_gpt_image:
         self._image_from_response(response).save(output_path)
 
     def generate_edit(self, prompt, input_image_path, output_image_path):
+        output = {
+            "status": "failed",
+            "text_response": None,
+            "image": None,
+            "error": None,
+            "safety_block": False,
+            "block_reason": None,
+            "finish_reason": None,
+        }
+
         try:
             with open(input_image_path, "rb") as source:
                 response = self.client.images.edit(
@@ -316,64 +384,69 @@ class Azure_gpt_image:
 
             image = self._image_from_response(response)
             image.save(output_image_path)
-            return {
-                "status": "success",
-                "text_response": None,
-                "image": image,
-                "error": None,
-            }
-        except Exception as e:
-            return {
-                "status": "failed",
-                "text_response": None,
-                "image": None,
-                "error": str(e),
-            }
 
+            output["status"] = "success"
+            output["image"] = image
 
+        except APIStatusError as error:
+            reason = self._safety_block_reason(error)
+            if reason is None:
+                raise
+            output["safety_block"] = True
+            output["block_reason"] = reason
+            output["error"] = str(error)
+
+        return output
 
 
 """
 ADD OTHER MODELS HERE
 """
+
+
 class VLMJudge:
     """
     VLM Judge Wrapper
     """
+
     def __init__(self, model_name: str = "gemini-3.5-flash"):
-        self.API_key = os.environ.get('GEMINI_API_KEY')
+        self.API_key = os.environ.get("GEMINI_API_KEY")
         self.model_name = model_name
-        self.client = genai.Client(enterprise=True,
-                                           project = 'gen-lang-client-0115168191',
-                                           location="global")
+        self.client = genai.Client(
+            enterprise=True,
+            project=os.environ["GOOGLE_CLOUD_PROJECT"],
+            location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+        )
 
     def judge_realism(self, image_path):
         image = Image.open(image_path)
-        with open("./prompts/realism_judge_prompt.txt",'r') as f:
+        with open(
+            Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt",
+            "r",
+            encoding="utf-8",
+        ) as f:
             prompt = f.read()
         response = self.client.models.generate_content(
-                    model= self.model_name, 
-                    contents= [prompt,image],
-                    )
-        
+            model=self.model_name,
+            contents=[prompt, image],
+        )
+
         text = response.text or ""
         match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
-        
+
         if not match:
             raise ValueError(f"Judge returned an invalid score: {text!r}")
-        
-        return int(match.group(1))
-        
-            
-        
 
+        return int(match.group(1))
 
     def judge_fidelity(self, original_image_path, edited_image_path, prompt):
 
-        with Image.open(original_image_path) as original, Image.open(edited_image_path) as edited:
+        with Image.open(original_image_path) as original, Image.open(
+            edited_image_path
+        ) as edited:
             response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=[prompt, original, edited])
+                model=self.model_name, contents=[prompt, original, edited]
+            )
 
         text = response.text or ""
         match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
@@ -382,103 +455,224 @@ class VLMJudge:
             raise ValueError(f"Fidelity judge returned an invalid score: {text!r}")
 
         return int(match.group(1))
-            
-            
+
+    def detect_refusal(self, prompt):
+        response = self.client.models.generate_content(
+            model=self.model_name, contents=[prompt]
+        )
+        return response.text
 
 
-    def detect_refusal(self,prompt):
-        try:
-            response = self.client.models.generate_content(model = self.model_name, contents = [prompt])
-            return response.text
-        except Exception as e:
-            raise
-
-       
 class Qwen3:
     def __init__(self, model_name: str = "Qwen/Qwen3-VL-2B-Instruct"):
         self.model_name = model_name
+        from transformers import AutoProcessor, AutoModelForMultimodalLM
+
         self.processor = AutoProcessor.from_pretrained(self.model_name)
-        self.model = AutoModelForMultimodalLM.from_pretrained(self.model_name, device_map="auto")
+        self.model = AutoModelForMultimodalLM.from_pretrained(
+            self.model_name, device_map="auto"
+        )
 
     def judge_realism(self, image_path):
         try:
             image = Image.open(image_path)
-            with open("./prompts/realism_judge_prompt.txt",'r') as f:
+            with open(
+                Path(__file__).resolve().parents[1]
+                / "prompts/realism_judge_prompt.txt",
+                "r",
+                encoding="utf-8",
+            ) as f:
                 prompt = f.read()
             messages = [
-                {"role": "user",
-                 "content": [ {"type": "image","image": image, },
-                             {"type": "text","text": prompt,}]}]
-        
-            inputs = self.processor.apply_chat_template(messages,add_generation_prompt=True, tokenize=True, return_dict=True, return_tensors="pt",).to(self.model.device)
-        
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "image": image,
+                        },
+                        {
+                            "type": "text",
+                            "text": prompt,
+                        },
+                    ],
+                }
+            ]
+
+            inputs = self.processor.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+            ).to(self.model.device)
+
             with torch.inference_mode():
-                outputs = self.model.generate( **inputs, max_new_tokens=40, do_sample=False, stop_strings=["</OUTPUT>"], tokenizer=self.processor.tokenizer,)
-        
-            generated = outputs[:, inputs["input_ids"].shape[-1]:]
-        
-            result = self.processor.batch_decode(generated, skip_special_tokens=True, clean_up_tokenization_spaces=False,)[0]
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=40,
+                    do_sample=False,
+                    stop_strings=["</OUTPUT>"],
+                    tokenizer=self.processor.tokenizer,
+                )
+
+            generated = outputs[:, inputs["input_ids"].shape[-1] :]
+
+            result = self.processor.batch_decode(
+                generated,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
+            )[0]
             match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", result, re.DOTALL)
 
             if match:
                 score = match.group(1)
-        
+
             return int(score)
-        
+
         except Exception as e:
             print(str(e))
-        
-                
-                    
-        
+
     def judge_fidelity(self, original_image_path, edited_image_path, prompt):
         try:
             original_image = Image.open(original_image_path).convert("RGB")
             edited_image = Image.open(edited_image_path).convert("RGB")
 
             messages = [
-                {"role": "user",
-                 "content": [{"type": "text","text": prompt},
-                             {"type": "image","image": original_image},
-                             {"type": "image","image": edited_image},],}]
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image", "image": original_image},
+                        {"type": "image", "image": edited_image},
+                    ],
+                }
+            ]
 
-            inputs = self.processor.apply_chat_template(messages, add_generation_prompt=True, tokenize=True, return_dict=True, return_tensors="pt", ).to(self.model.device)
+            inputs = self.processor.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+            ).to(self.model.device)
 
             with torch.inference_mode():
-                outputs = self.model.generate( **inputs, max_new_tokens=200, do_sample=False, stop_strings=["</OUTPUT>"], tokenizer=self.processor.tokenizer, )
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=200,
+                    do_sample=False,
+                    stop_strings=["</OUTPUT>"],
+                    tokenizer=self.processor.tokenizer,
+                )
 
-            generated_tokens = outputs[:, inputs["input_ids"].shape[-1]:]
+            generated_tokens = outputs[:, inputs["input_ids"].shape[-1] :]
 
-            result = self.processor.batch_decode(generated_tokens, skip_special_tokens=True, clean_up_tokenization_spaces=False, )[0]
+            result = self.processor.batch_decode(
+                generated_tokens,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
+            )[0]
 
             match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", result, re.DOTALL)
-            
+
             if match:
                 score = match.group(1)
-            
+
             return int(score)
 
         except Exception as e:
             print(str(e))
             return None
 
-
     def detect_refusal(self, prompt):
         try:
-            messages = [{"role": "user",
-                         "content": [{"type": "text","text": prompt,}],}]
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt,
+                        }
+                    ],
+                }
+            ]
 
-            inputs = self.processor.apply_chat_template(messages, add_generation_prompt=True, tokenize=True, return_dict=True, return_tensors="pt", ).to(self.model.device)
+            inputs = self.processor.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+            ).to(self.model.device)
 
             with torch.inference_mode():
-                outputs = self.model.generate(**inputs, max_new_tokens=100, do_sample=False,)
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=100,
+                    do_sample=False,
+                )
 
-            generated_tokens = outputs[:, inputs["input_ids"].shape[-1]:]
+            generated_tokens = outputs[:, inputs["input_ids"].shape[-1] :]
 
-            response = self.processor.batch_decode(generated_tokens, skip_special_tokens=True, clean_up_tokenization_spaces=False, )[0]
+            response = self.processor.batch_decode(
+                generated_tokens,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
+            )[0]
 
             return response.strip()
 
         except Exception as e:
             print(str(e))
             return None
+
+
+class OpenAIJudge:
+    """OpenAI-compatible Azure judge; deployment and endpoint are configuration."""
+
+    def __init__(self, model_name, base_url=None, api_key=None):
+        self.model_name = model_name
+        self.client = OpenAI(
+            base_url=base_url or os.environ["AZURE_OPENAI_BASE_URL"],
+            api_key=api_key or os.environ["Azure_API_KEY"],
+            max_retries=0,
+        )
+
+    @staticmethod
+    def _image(path):
+        with Image.open(path) as image:
+            buffer = BytesIO()
+            image.convert("RGB").save(buffer, format="PNG")
+        encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+        return {
+            "type": "image_url",
+            "image_url": {"url": "data:image/png;base64," + encoded},
+        }
+
+    def _ask(self, prompt, paths=()):
+        content = [{"type": "text", "text": prompt}] + [self._image(p) for p in paths]
+        response = self.client.chat.completions.create(
+            model=self.model_name, messages=[{"role": "user", "content": content}]
+        )
+        return response.choices[0].message.content or ""
+
+    def detect_refusal(self, prompt):
+        return self._ask(prompt)
+
+    @staticmethod
+    def _score(text):
+        match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
+        if not match:
+            raise ValueError(f"Judge returned an invalid score: {text!r}")
+        return int(match.group(1))
+
+    def judge_fidelity(self, original_image_path, edited_image_path, prompt):
+        return self._score(self._ask(prompt, (original_image_path, edited_image_path)))
+
+    def judge_realism(self, image_path):
+        prompt = (
+            Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt"
+        ).read_text(encoding="utf-8")
+        return self._score(self._ask(prompt, (image_path,)))

@@ -1,4 +1,10 @@
 def compute_metrics(rows, tau=4):
+    """Compute conditional research metrics using only completed evaluations.
+
+    RR: refused / valid. EF: faithful / nonrefused.
+    RS: realism >= tau / faithful. HRR: faithful and realistic / valid.
+    Undefined denominators return None; technical errors never count as refusals.
+    """
     valid = [row for row in rows if row["status"] == "ok"]
 
     if not valid:

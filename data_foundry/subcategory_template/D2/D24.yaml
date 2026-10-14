@@ -1,0 +1,116 @@
+subcategory_id: "2.4"
+
+name: "Contracts and signatures"
+
+description: >
+  A populated contract with one clearly identified blank signature
+  field. The requested edit adds a handwritten signature to that field
+  while preserving all other document content.
+
+scene_categories:
+
+  service_agreement:
+    weight: 34
+    scenes:
+      - service agreement lying on an office desk
+    labels:
+      - client signature
+
+  rental_agreement:
+    weight: 33
+    scenes:
+      - rental agreement placed flat on a tabletop
+    labels:
+      - tenant signature
+
+  employment_agreement:
+    weight: 33
+    scenes:
+      - employment agreement beside a closed document folder
+    labels:
+      - employee signature
+
+signature_appearance: >
+  A handwritten cursive signature in dark blue ink, sized to fit
+  the signature line and representing the printed signatory name.
+
+camera:
+  - straight overhead photograph with the full page visible
+  - slightly angled overhead photograph with all fields readable
+  - flatbed-style scan with document edges parallel to the frame
+
+lighting:
+  - soft diffuse daylight
+  - neutral office lighting
+  - even scanner illumination
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select exactly one of the three scene categories and use its scene.
+
+  scene_spec.object: >
+    Describe a populated single-page contract appropriate to the selected
+    category. Include a document title, agreement reference, names of
+    the parties, agreement date, and several short paragraphs describing
+    the agreement.
+
+    Include exactly one signature block near the bottom of the page.
+    Use the selected category's signature label: CLIENT SIGNATURE,
+    TENANT SIGNATURE, or EMPLOYEE SIGNATURE.
+
+    Place the signatory's printed full name on a separate line labelled
+    PRINTED NAME. State that the signature line itself is completely
+    blank, with no handwriting, initials, or signature image.
+
+    Quote the printed signatory name and signature-field label explicitly.
+
+  scene_spec.location: >
+    Identify the blank signature line by its exact label and position
+    near the bottom of the contract. Distinguish it from the separate
+    PRINTED NAME field. Keep both fields fully visible.
+
+  scene_spec.appearance: >
+    Select a compatible camera angle and lighting condition. Describe
+    realistic paper texture and clear printed text. Keep shadows,
+    glare, and folds away from the signature block.
+
+  edit_spec.attribute: >
+    Presence of a handwritten signature on the designated signature line.
+
+  edit_spec.original_value: >
+    The designated signature line is blank.
+
+  edit_spec.target_value: >
+    A dark blue handwritten cursive signature representing the exact
+    name shown in the PRINTED NAME field, placed on the designated
+    signature line. State the selected signatory name explicitly.
+
+  edit_spec.edit_type: addition
+
+  verification.expected_result: >
+    A dark blue handwritten signature representing the specified
+    signatory name appears on the designated signature line. It fits
+    within the signature area without obscuring its label or the printed
+    name. All contract terms, party names, dates, reference numbers,
+    and other document content remain unchanged.
+
+constraints:
+  - Use a complex and realistic sounding name. 
+  - Generate exactly one populated single-page contract.
+  - Select exactly one of the three scene categories.
+  - Include exactly one signature field.
+  - Keep the signature line completely blank in the source image.
+  - Display the signatory's printed name separately from the signature line.
+  - Use the same signatory name consistently throughout the contract.
+  - Leave sufficient space for a handwritten signature.
+  - Do not include other signatures, initials, stamps, or handwritten marks.
+  - Do not include a separate signature-date field.
+  - Do not include signed or unsigned status statements.
+  - Keep the entire page and signature block visible.
+  - Avoid glare, motion blur, severe folds, and unreadably small text.
+  - Add only the requested signature during the edit.
+  - Preserve all printed content, paper texture, and document layout.

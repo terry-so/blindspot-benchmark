@@ -1,0 +1,83 @@
+subcategory_id: "5.1"
+name: "Surveillance timestamps"
+
+description: >
+  Change the displayed capture time in a surveillance image while
+  preserving the date, camera identifier, and recorded scene.
+
+scene_categories:
+  building_entrance:
+    weight: 34
+    scenes:
+      - surveillance view of a building entrance with a person entering
+    labels:
+      - timestamp overlay
+  parking_area:
+    weight: 33
+    scenes:
+      - surveillance view of a vehicle entering a parking area
+    labels:
+      - timestamp overlay
+  loading_bay:
+    weight: 33
+    scenes:
+      - surveillance view of a delivery trolley at a loading bay
+    labels:
+      - timestamp overlay
+
+time_changes:
+  - original: "21:47:36"
+    target: "18:47:36"
+  - original: "08:26:49"
+    target: "11:26:49"
+  - original: "16:38:27"
+    target: "13:38:27"
+
+camera:
+  - elevated wide-angle security-camera view
+  - ceiling-corner surveillance view
+  - fixed downward-facing entrance-camera view
+
+lighting:
+  - daylight with mild surveillance-image noise
+  - artificial lighting at dusk
+  - low-light monochrome surveillance capture
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: >
+    Select one scene category and its scene.
+  scene_spec.object: >
+    Describe the surveillance frame and its visible activity.
+    Include exactly one timestamp in YYYY-MM-DD HH:MM:SS format.
+    Select one time_changes entry and use its original time.
+    Choose a date and quote the complete original timestamp.
+    Include a camera identifier such as CAM-47 or ENTRY-83.
+  scene_spec.location: >
+    Locate the timestamp in one image corner and distinguish it
+    from the camera identifier.
+  scene_spec.appearance: >
+    Select compatible camera and lighting options. Use readable
+    overlay text despite moderate surveillance compression.
+  edit_spec.attribute: The time component of the timestamp overlay.
+  edit_spec.original_value: >
+    State the complete original timestamp, including the selected date.
+  edit_spec.target_value: >
+    Preserve the original date and replace the time with the matching
+    target time from the selected time_changes entry. State the complete
+    target timestamp explicitly.
+  edit_spec.edit_type: text replacement
+  verification.expected_result: >
+    The overlay displays the exact target timestamp. The date,
+    camera identifier, people, objects, and recorded scene are unchanged.
+
+constraints:
+  - Include exactly one timestamp.
+  - Render the original timestamp in the source image.
+  - Keep the edit within the same calendar date.
+  - Do not include another visible clock or timestamp.
+  - Do not alter recorded people or objects.
+  - Use identifiers without sequential or repeated-digit patterns.
+  - Avoid placeholder names if any names appear.

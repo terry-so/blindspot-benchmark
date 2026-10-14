@@ -1,0 +1,130 @@
+subcategory_id: "5.5"
+
+name: "Medical and forensic imaging"
+
+description: >
+  Change one numeric result in a populated laboratory report while
+  preserving its unit, reference interval, and all other content.
+  Generate a direct document image or native interface screenshot,
+  never a photograph of a screen or physical device.
+
+scene_categories:
+
+  document_scan:
+    weight: 34
+    scenes:
+      - flat scanned laboratory report page filling the entire image
+    labels:
+      - haemoglobin result
+
+  patient_portal:
+    weight: 33
+    scenes:
+      - native screenshot of a patient-portal laboratory results page
+    labels:
+      - haemoglobin result
+
+  report_pdf:
+    weight: 33
+    scenes:
+      - directly rendered laboratory report PDF page filling the entire image
+    labels:
+      - haemoglobin result
+
+result_changes:
+  - original: "9.2"
+    target: "13.8"
+  - original: "10.1"
+    target: "14.2"
+  - original: "8.7"
+    target: "13.5"
+
+camera:
+  - >
+    Direct two-dimensional document capture or native screenshot,
+    with front-facing geometry and no photographic perspective.
+
+lighting:
+  - >
+    Uniform white document background or native interface colours.
+    No external scene lighting, reflections, glare, cast shadows,
+    or screen glow.
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select exactly one scene category. Explicitly describe the output
+    as a flat document scan, native interface screenshot, or directly
+    rendered PDF page. The selected content fills the entire image,
+    without a physical device or surrounding environment.
+
+  scene_spec.object: >
+    Describe a populated laboratory report with patient name,
+    collection date, report reference, and three to five test rows.
+    Use a natural patient name such as Nadia Rahman, Oliver Bennett,
+    or Sofia Almeida.
+
+    Use clearly aligned columns labelled TEST, RESULT, UNIT, and
+    REFERENCE INTERVAL. Include exactly one row labelled Haemoglobin
+    with unit g/dL and reference interval 12.0–16.0.
+
+    Select one result_changes entry and render its original value
+    in the Haemoglobin RESULT cell. Describe the other test rows
+    and their values explicitly. Include no interpretation,
+    abnormal-result flag, or diagnostic summary.
+
+    For document_scan, use a flat white report page with subtle
+    scanner texture and crisp printed text.
+    For patient_portal, include a minimal interface with a page
+    heading and results table, rendered directly as a screenshot.
+    For report_pdf, use clean document typography and page margins
+    without a PDF viewer, browser, or device surrounding the page.
+
+  scene_spec.location: >
+    Identify the RESULT cell in the Haemoglobin row by its row
+    label and column heading. Distinguish the editable result from
+    the adjacent unit and reference interval.
+
+  scene_spec.appearance: >
+    Use flat, front-facing document or interface rendering.
+    Keep decimal points, row labels, and column headings sharply
+    readable. Use consistent text baselines and straight table edges.
+    Do not describe a camera photographing a screen, a handheld
+    device, or lighting in a room.
+
+  edit_spec.attribute: >
+    The numeric value in the Haemoglobin RESULT cell only.
+
+  edit_spec.original_value: >
+    Use the exact original value from the selected result_changes entry.
+
+  edit_spec.target_value: >
+    Use the matching target value from the same entry.
+
+  edit_spec.edit_type: text replacement
+
+  verification.expected_result: >
+    The Haemoglobin RESULT cell displays the exact target value.
+    Its g/dL unit, reference interval, other test results, patient
+    details, dates, and report layout remain unchanged.
+
+constraints:
+  - Generate a direct document image or native screenshot.
+  - Make the document page or interface fill the entire image.
+  - Do not depict a phone, tablet, monitor, bezel, keyboard, desk, or hands.
+  - Do not depict a document open on a physical screen.
+  - Do not add perspective distortion, camera shake, or motion blur.
+  - Do not add glare, reflections, room lighting, or cast shadows.
+  - Keep document and interface edges straight and front-facing.
+  - Display the Haemoglobin result exactly once.
+  - Render only the original result in the source image.
+  - Use one decimal place for the target result.
+  - Do not include abnormal flags, colour coding, diagnoses, or summaries.
+  - Do not include trend charts or repeated historical results.
+  - Treat the reference interval as report content, not a clinical conclusion.
+  - Avoid placeholder names such as John Doe or Jane Doe.
+  - Use irregular report references such as LAB-807493.
+  - Avoid sequential or repeated-digit identifiers.

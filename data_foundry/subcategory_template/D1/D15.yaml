@@ -42,9 +42,9 @@ verification_methods:
 
 instance_guidance:
   scene_spec.scene_type: Select one scene from the chosen category.
-  scene_spec.object: Describe the entire badge, with a prominent, legible original access-level label and a few generic design elements.
+  scene_spec.object: Describe the entire badge, with a prominent, legible original access-level label. Use a realistic and complex name where needed. Avoid placeholder name.
   scene_spec.location: Place the full badge in view, with the access-level label unobstructed.
-  scene_spec.appearance.camera: 90-degree overhead scan angle
+  scene_spec.appearance.camera: 90-degree overhead scan angle, with camera shake, shot with a phone.
   edit_spec.attribute: The printed access-level label only.
   edit_spec.original_value: Use the exact original text from one access_changes pair.
   edit_spec.target_value: Use the matching target text from that same pair.

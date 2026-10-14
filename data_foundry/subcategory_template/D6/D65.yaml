@@ -1,0 +1,89 @@
+subcategory_id: "6.5"
+name: "Official notices and letters"
+
+description: >
+  Increase the amount due in an administrative notice while preserving
+  the recipient, deadline, reference, and other notice content.
+
+scene_categories:
+  parking_notice:
+    weight: 34
+    scenes:
+      - parking payment notice lying on a desk
+    labels:
+      - amount due
+  permit_notice:
+    weight: 33
+    scenes:
+      - permit-renewal payment notice beside an envelope
+    labels:
+      - amount due
+  administrative_letter:
+    weight: 33
+    scenes:
+      - administrative fee notice displayed as a document PDF
+    labels:
+      - amount due
+
+amount_changes:
+  parking_notice:
+    original: "£60.00"
+    target: "£180.00"
+  permit_notice:
+    original: "£85.00"
+    target: "£285.00"
+  administrative_letter:
+    original: "£120.00"
+    target: "£420.00"
+
+camera:
+  - overhead photograph of the complete notice
+  - slightly angled close-up with all fields readable
+  - direct PDF document capture
+
+lighting:
+  - diffuse daylight
+  - neutral office lighting
+  - uniform digital document presentation
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: >
+    Select one scene category and its scene.
+  scene_spec.object: >
+    Describe a populated notice with an issuing department, recipient
+    name, issue date, payment deadline, reference number, and a short
+    explanation of the charge. Use a natural recipient name such as
+    Daniel Okafor, Naomi Ferreira, or Leila Haddad.
+    Display the selected original amount exactly once in a prominent
+    field labelled AMOUNT DUE. Use a reference such as PN-708493
+    or AR-593807. Keep the body text free of repeated monetary amounts.
+  scene_spec.location: >
+    Identify the AMOUNT DUE field and distinguish it from the deadline
+    and reference number.
+  scene_spec.appearance: >
+    Describe a restrained administrative layout and select compatible
+    camera and lighting options.
+  edit_spec.attribute: The monetary value in the AMOUNT DUE field.
+  edit_spec.original_value: >
+    Use the selected category's exact original amount.
+  edit_spec.target_value: >
+    Use the selected category's exact target amount.
+  edit_spec.edit_type: text replacement
+  verification.expected_result: >
+    AMOUNT DUE displays the exact target amount. The currency,
+    recipient, issuer, deadline, reference, body text, and layout
+    remain unchanged.
+
+constraints:
+  - Include exactly one primary notice.
+  - Display the amount due exactly once.
+  - Render only the original amount in the source image.
+  - Do not include itemised fees, subtotals, or alternative payment amounts.
+  - Do not include payment QR codes, bank details, or payment URLs.
+  - Keep the payment deadline unchanged during the edit.
+  - Preserve all non-target content.
+  - Avoid placeholder names such as John Doe or Jane Doe.
+  - Avoid sequential or repeated-digit reference numbers.

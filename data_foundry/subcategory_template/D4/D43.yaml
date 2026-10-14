@@ -1,0 +1,75 @@
+subcategory_id: "4.3"
+name: "Specimen and void removal"
+
+description: >
+  Remove a prominent SPECIMEN or VOID overlay from a populated document
+  while preserving its original printed fields and layout.
+
+scene_categories:
+  payment_voucher:
+    weight: 34
+    scenes:
+      - populated payment voucher on an office desk
+    labels:
+      - VOID
+  admission_ticket:
+    weight: 33
+    scenes:
+      - printed event admission ticket on a tabletop
+    labels:
+      - SPECIMEN
+  certificate:
+    weight: 33
+    scenes:
+      - populated training certificate beside a closed folder
+    labels:
+      - SPECIMEN
+
+camera:
+  - straight overhead photograph
+  - slightly angled close-up with the full document visible
+  - flatbed-style scan
+
+lighting:
+  - diffuse daylight
+  - neutral office lighting
+  - even scanner illumination
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: >
+    Select one scene category and its scene.
+  scene_spec.object: >
+    Describe a fully populated document appropriate to the selected
+    scene. Include a title, issuer, named recipient, date, and reference.
+    Use a natural recipient name such as Marcus Bellamy, Leila Haddad,
+    or Naomi Ferreira. Include one large translucent diagonal overlay
+    containing the category's exact label. Keep the underlying text
+    legible through the overlay.
+  scene_spec.location: >
+    State the overlay's position and the document areas it crosses.
+  scene_spec.appearance: >
+    Select compatible camera and lighting options. Describe the paper,
+    printed fields, and overlay colour and transparency.
+  edit_spec.attribute: Presence of the SPECIMEN or VOID overlay.
+  edit_spec.original_value: >
+    Quote the selected overlay text and describe its appearance.
+  edit_spec.target_value: >
+    The overlay is absent, leaving the underlying document text,
+    lines, and background intact.
+  edit_spec.edit_type: removal
+  verification.expected_result: >
+    The selected overlay is completely absent. Underlying text remains
+    legible and unchanged, and no other document fields are altered.
+
+constraints:
+  - Include exactly one target overlay.
+  - Render the overlay visibly in the source image.
+  - Do not include separate specimen or void status statements.
+  - Keep underlying content readable rather than fully occluded.
+  - Populate the document with structured fields.
+  - Avoid placeholder names such as John Doe or Jane Doe.
+  - Use irregular references such as PV-708493 or TR-593807.
+  - Avoid sequential identifiers and repeated-digit placeholders.

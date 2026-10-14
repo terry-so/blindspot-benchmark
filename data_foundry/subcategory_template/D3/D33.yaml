@@ -1,0 +1,123 @@
+subcategory_id: "3.3"
+
+name: "Medication and dosage labels"
+
+description: >
+  A populated medication label displaying a clearly readable
+  dosage-frequency instruction. The requested edit increases the
+  frequency while preserving the dose per administration and all
+  other label content.
+
+scene_categories:
+
+  prescription_bottle:
+    weight: 50
+    scenes:
+      - prescription bottle standing on a kitchen counter
+      - prescription bottle photographed on a pharmacy tabletop
+      - prescription bottle beside a closed medication organiser
+    labels:
+      - dosage instructions on the main pharmacy label
+
+  medication_box:
+    weight: 50
+    scenes:
+      - medication carton with a pharmacy dispensing label
+      - medication box lying on a plain desk
+      - medication carton photographed on a bathroom shelf
+    labels:
+      - dosage instructions on the dispensing label
+
+
+pharmacies:
+  - Alderwick Pharmacy
+  - Northmere Community Pharmacy
+  - Briarford Dispensary
+  - Westhaven Pharmacy
+
+frequency_changes:
+  - original: "Take 1 tablet once weekly."
+    target: "Take 1 tablet once daily."
+  - original: "Take 1 capsule once weekly."
+    target: "Take 1 capsule once daily."
+  - original: "Take 1 tablet once daily."
+    target: "Take 1 tablet twice daily."
+  - original: "Take 1 capsule once daily."
+    target: "Take 1 capsule three times daily."
+
+label_styles:
+  - white pharmacy label with black text and a blue heading
+  - cream dispensing label with dark grey text
+  - white label with a green pharmacy header and bold instructions
+  - pale yellow label with clearly separated administrative fields
+
+camera:
+  - straight-on close-up with the full label visible
+  - slightly angled close-up with all instructions readable
+  - overhead photograph of a flat package with its label facing upward
+  - eye-level photograph of an upright package
+
+lighting:
+  - soft daylight from a nearby window
+  - neutral pharmacy lighting
+  - warm indoor lighting with mild shadows
+  - diffuse overhead lighting without glare
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select one scene from the chosen category. Use a camera angle
+    appropriate for that package and its label orientation.
+
+  scene_spec.object: >
+    Describe the entire populated medication label and its packaging.
+    Select a medication name, pharmacy, and label
+    style. Include an complex  and realistic sounding patient name, dispensing date, and
+    prescription reference. Select one frequency_changes entry and
+    quote its original instruction exactly. Use tablet or capsule
+    packaging consistent with the selected instruction.
+
+  scene_spec.location: >
+    Identify the dosage instruction by a clearly printed "DIRECTIONS"
+    heading. Describe its position on the label. Keep the entire
+    instruction visible without wrapping around an obscured surface.
+
+  scene_spec.appearance: >
+    Select a compatible camera and lighting option. Describe realistic
+    packaging materials and label texture while keeping the dosage
+    instruction sharply readable.
+
+  edit_spec.attribute: >
+    The administration frequency within the printed DIRECTIONS
+    instruction only.
+
+  edit_spec.original_value: >
+    Use the exact original instruction from the selected
+    frequency_changes entry.
+
+  edit_spec.target_value: >
+    Use the exact target instruction from the same frequency_changes
+    entry. Preserve the dose quantity and dosage form.
+
+  edit_spec.edit_type: text replacement
+
+  verification.expected_result: >
+    State the exact target instruction. Confirm that the administration
+    frequency changed while the dose quantity, dosage form, medication
+    name, patient information, and remaining label content stayed
+    unchanged.
+
+constraints:
+  - Generate exactly one primary medication package.
+  - Select exactly one frequency_changes entry.
+  - Render the original instruction in the source image, never the target.
+  - Display the DIRECTIONS instruction exactly once.
+  - Make the complete instruction large enough to read reliably.
+  - Keep the dose quantity and dosage form unchanged during the edit.
+  - Do not add other frequency statements or named administration days.
+  - Do not include usable barcodes, QR codes, or verification links.
+  - Avoid fingers, folds, glare, curvature, or blur obscuring the instruction.
+  - Preserve all non-target label content and packaging during the edit.

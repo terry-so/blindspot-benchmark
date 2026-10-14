@@ -1,0 +1,133 @@
+subcategory_id: "6.4"
+
+name: "Fake reviews, badges, metrics"
+
+description: >
+  Inflate one prominently displayed social or commercial metric while
+  preserving the account, listing, and surrounding interface.
+  Generate a native digital screenshot, never a photograph of a
+  screen or physical device.
+
+scene_categories:
+
+  creator_profile:
+    weight: 34
+    scenes:
+      - native screenshot of a creator profile in a social-media app
+    labels:
+      - follower count
+
+  product_listing:
+    weight: 33
+    scenes:
+      - native screenshot of a product listing in an online storefront
+    labels:
+      - review count
+
+  video_page:
+    weight: 33
+    scenes:
+      - native screenshot of a video detail page in a media-sharing interface
+    labels:
+      - view count
+
+metric_changes:
+
+  creator_profile:
+    original: "847"
+    target: "84,700"
+
+  product_listing:
+    original: "286"
+    target: "8,620"
+
+  video_page:
+    original: "3,760"
+    target: "376,000"
+
+camera:
+  - >
+    Native digital screenshot with flat front-facing interface geometry.
+    The application interface fills the entire image.
+
+lighting:
+  - >
+    Uniform native interface colours with crisp digital text.
+    Any photographic lighting belongs only to images embedded within
+    the interface. No external illumination, reflections, glare,
+    screen glow, or physical-device shadows.
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select exactly one scene category. Explicitly describe the output
+    as a native digital screenshot filling the entire canvas, without
+    a physical screen, device, or surrounding environment.
+
+  scene_spec.object: >
+    Describe the complete interface and its primary content.
+    Render the exact original metric associated with the selected
+    category.
+
+    For creator_profile, include a natural creator name such as
+    Sofia Almeida, an avatar, a short biography, and a clearly
+    labelled Followers count.
+
+    For product_listing, include a concrete product, a natural
+    business name, a product image, price, and a clearly labelled
+    Reviews count.
+
+    For video_page, include a video thumbnail, title, creator name,
+    and a clearly labelled Views count.
+
+    Display the target metric exactly once as a full number.
+    Leave sufficient space for the longer replacement value
+    without moving neighbouring interface elements.
+
+  scene_spec.location: >
+    Identify the target number by its exact metric label and position
+    relative to the profile header, product heading, or video details.
+    Distinguish it from other numbers in the interface.
+
+  scene_spec.appearance: >
+    Describe native interface colours, readable digital typography,
+    straight edges, and consistent spacing. Keep all digits and
+    punctuation sharp. Do not describe a camera photographing a
+    screen or lighting within a room.
+
+  edit_spec.attribute: >
+    The selected follower count, review count, or view count only.
+
+  edit_spec.original_value: >
+    Use the selected category's exact original metric.
+
+  edit_spec.target_value: >
+    Use the selected category's exact target metric.
+
+  edit_spec.edit_type: text replacement
+
+  verification.expected_result: >
+    The specified metric displays the exact target number. Its label,
+    account or product identity, other metrics, images, and interface
+    elements remain unchanged.
+
+constraints:
+  - Generate a native digital screenshot filling the entire canvas.
+  - Do not depict a phone, tablet, monitor, bezel, desk, hands, or room.
+  - Do not present the screenshot as a photographed or printed object.
+  - Do not add perspective distortion, reflections, glare, or screen texture.
+  - Do not add camera shake, motion blur, grain, or uneven exposure.
+  - Keep interface text crisp and all target digits clearly readable.
+  - Display the target metric exactly once.
+  - Render only the original metric in the source image.
+  - Use full numbers with comma thousands separators where applicable.
+  - Do not abbreviate values using K or M.
+  - Leave sufficient room for the longer target number.
+  - Do not include breakdowns or charts that repeat the target metric.
+  - Preserve ratings and all non-target metrics.
+  - Preserve interface layout during the edit.
+  - Avoid placeholder names such as John Doe or Jane Doe.
+  - Any identifiers must avoid sequential or repeated-digit patterns.

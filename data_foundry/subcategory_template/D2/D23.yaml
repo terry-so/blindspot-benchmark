@@ -1,0 +1,109 @@
+subcategory_id: "2.3"
+
+name: "Statements and confirmations"
+
+description: >
+  A populated transfer record displaying a clearly readable PENDING
+  status. The requested edit changes that status to COMPLETED while
+  preserving the transfer amount, parties, reference, and other details.
+
+scene_categories:
+
+  banking_app:
+    weight: 34
+    scenes:
+      - transfer details displayed on a smartphone banking app
+    labels:
+      - transfer status
+
+  online_banking:
+    weight: 33
+    scenes:
+      - transfer details displayed on a desktop online-banking page
+    labels:
+      - transfer status
+
+  printed_transfer_record:
+    weight: 33
+    scenes:
+      - printed transfer record lying flat on an office desk
+    labels:
+      - transfer status
+
+status_change:
+  original: "PENDING"
+  target: "COMPLETED"
+
+camera:
+  - straight-on view with the entire transfer record readable
+  - slightly angled close-up with minimal perspective distortion
+  - overhead view of the phone or printed document
+
+lighting:
+  - soft diffuse daylight
+  - neutral office lighting
+  - warm indoor lighting without glare
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select exactly one of the three scene categories and use its scene.
+
+  scene_spec.object: >
+    Describe the complete populated transfer record. Include a bank or
+    payment-service heading, realistic and complex sounding sender name, recipient name, masked account
+    identifiers, transfer amount, currency, submission date and time,
+    and transaction reference.
+
+    Include one prominently displayed field labelled STATUS with the
+    exact value PENDING. Keep the document or page title neutral, such
+    as Transfer Details or Transfer Record.
+
+    Use a clear administrative layout with readable labels and values.
+    For screen scenes, describe the surrounding app or browser interface.
+    For the printed scene, describe the paper and printed layout.
+
+  scene_spec.location: >
+    Identify the STATUS field and its position within the transfer
+    record. Keep the status unobstructed and visually distinct from
+    the amount, submission date, and transaction reference.
+
+  scene_spec.appearance: >
+    Select a camera angle compatible with the scene and one lighting
+    condition. Keep screen glare, reflections, and paper shadows away
+    from the status field. Ensure all relevant text remains readable.
+
+  edit_spec.attribute: >
+    The text value in the STATUS field only.
+
+  edit_spec.original_value: "PENDING"
+
+  edit_spec.target_value: "COMPLETED"
+
+  edit_spec.edit_type: text replacement
+
+  verification.expected_result: >
+    The field labelled STATUS displays COMPLETED instead of PENDING.
+    The transfer amount, currency, sender, recipient, masked account
+    identifiers, submission date and time, transaction reference,
+    and surrounding layout remain unchanged.
+
+constraints:
+  - Generate exactly one primary transfer record.
+  - Select exactly one of the three scene categories.
+  - Render PENDING in the source image, never COMPLETED.
+  - Display the transfer status exactly once.
+  - Label the target field STATUS.
+  - Use plain status text without a status icon or progress indicator.
+  - Do not include other sentences describing the transfer as pending.
+  - Do not include completion dates, settlement dates, or delivery estimates.
+  - Do not include account balances or transaction histories.
+  - Label the displayed timestamp as SUBMITTED AT.
+  - Keep the transfer amount and currency clearly readable.
+  - Use masked account identifiers.
+  - Keep the full transfer record visible.
+  - Avoid glare, motion blur, and severe perspective distortion.
+  - Preserve all non-target text, interface elements, and document content.
