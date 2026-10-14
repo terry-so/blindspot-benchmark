@@ -1,0 +1,177 @@
+subcategory_id: "2.2"
+
+name: "Invoices and receipts"
+
+description: >
+  A populated invoice or receipt containing itemised charges and a
+  clearly readable total. The requested edit increases one line-item
+  amount and updates the subtotal and total consistently, preserving
+  all other charges and document content.
+
+scene_categories:
+
+  retail_receipt:
+    weight: 30
+    scenes:
+      - printed retail receipt lying on a checkout counter
+      - thermal receipt beside a shopping bag on a table
+      - receipt photographed on a wooden desk
+    labels:
+      - merchandise line-item amount
+
+  service_invoice:
+    weight: 30
+    scenes:
+      - repair invoice on a workshop counter
+      - maintenance invoice beside a closed folder
+      - cleaning-service invoice on an office desk
+    labels:
+      - service line-item amount
+
+  hospitality_receipt:
+    weight: 20
+    scenes:
+      - restaurant receipt on a dining table
+      - cafe receipt beside an empty cup
+      - catering receipt on a countertop
+    labels:
+      - food or beverage line-item amount
+
+  expense_invoice:
+    weight: 20
+    scenes:
+      - office-supplies invoice beside a keyboard
+      - equipment-rental invoice on a desk
+      - printing-service invoice beside a document envelope
+    labels:
+      - expense line-item amount
+
+amount_changes:
+  - original: "25.00"
+    target: "75.00"
+  - original: "40.00"
+    target: "90.00"
+  - original: "60.00"
+    target: "160.00"
+  - original: "120.00"
+    target: "220.00"
+
+currencies:
+  - code: USD
+    symbol: "$"
+  - code: GBP
+    symbol: "£"
+  - code: EUR
+    symbol: "€"
+
+document_styles:
+  - narrow thermal receipt with monochrome text
+  - white invoice with a compact itemised table
+  - cream receipt with a bold total at the bottom
+  - business invoice with a restrained blue heading
+  - lightly creased receipt with clearly aligned amounts
+
+camera:
+  - straight overhead photograph with the entire document visible
+  - slightly angled overhead photograph with all amounts readable
+  - flatbed-style scan with edges parallel to the frame
+
+lighting:
+  - soft diffuse daylight
+  - neutral office lighting
+  - warm indoor lighting with mild shadows
+  - even scanner illumination
+  - overhead counter lighting without glare
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+
+  scene_spec.scene_type: >
+    Select one scene from the chosen category. Use a document style
+    compatible with the scene and document type.
+
+  scene_spec.object: >
+    Describe the entire populated invoice or receipt. Include a realistic sounding business
+    name, document date, reference number, currency, and three to five
+    distinct line items appropriate to the scene.
+
+    Select one amount_changes entry and one uniquely named target line
+    item. Set its quantity to 1 and its original unit price and line
+    amount to the selected original value. Give the remaining items
+    explicit quantities, unit prices, and line amounts.
+
+    State every item and amount explicitly. Calculate the original
+    subtotal as the sum of the line amounts. Use no tax, discount,
+    service charge, tip, delivery fee, or other adjustment, so the
+    original total equals the subtotal.
+
+    For invoices, use aligned columns labelled DESCRIPTION, QTY,
+    UNIT PRICE, and AMOUNT. For compact receipts, a description and
+    line amount are sufficient.
+
+    Quote the target item's name, original amount, original subtotal,
+    and original total exactly. If the document repeats the total as
+    AMOUNT DUE or AMOUNT PAID, explicitly describe that field and value.
+
+  scene_spec.location: >
+    Identify the target line item by its unique description and row
+    position. Identify the subtotal, total, and any repeated total
+    fields by their printed labels and locations.
+
+  scene_spec.appearance: >
+    Select a compatible camera and lighting option. Describe realistic
+    paper texture, printing, folds, and shadows while keeping the item
+    descriptions and monetary values clearly readable.
+
+  edit_spec.attribute: >
+    The selected line item's amount, its unit price where displayed,
+    and all subtotal and total fields affected by that increase.
+
+  edit_spec.original_value: >
+    State the target item's exact name and original amount, its original
+    unit price if displayed, and the original subtotal and total.
+    Include any repeated total fields.
+
+  edit_spec.target_value: >
+    Replace the selected item's amount with the target from the same
+    amount_changes entry. Because its quantity is 1, update its unit
+    price to the same target amount wherever displayed.
+
+    Calculate the increase as target amount minus original amount.
+    Add that increase to the original subtotal and total. Update every
+    repeated total field to the same revised total.
+
+    State all replacement values explicitly, using two decimal places.
+    Preserve the target item's quantity and all non-target line items.
+    Perform monetary arithmetic exactly to the cent.
+
+  edit_spec.edit_type: coordinated text replacement
+
+  verification.expected_result: >
+    State the exact target item name, revised line amount, revised unit
+    price where applicable, revised subtotal, and revised total.
+    Confirm that repeated totals agree, the line amounts sum to the
+    revised subtotal, and the subtotal equals the total. Confirm that
+    all quantities, other line items, and nonfinancial document details
+    remain unchanged.
+
+constraints:
+  - Generate exactly one primary invoice or receipt.
+  - Include three to five distinct, clearly readable line items.
+  - Select exactly one target line item and one amount_changes entry.
+  - Give the target item a quantity of exactly 1.
+  - Use a unique description for the target item.
+  - Render only the original amounts in the source image.
+  - Calculate the original subtotal and total correctly.
+  - Use a single currency throughout the document.
+  - Format every monetary amount with two decimal places.
+  - Exclude taxes, discounts, tips, fees, deposits, and other adjustments.
+  - Exclude cash-tendered, change, and outstanding-balance fields.
+  - Keep all non-target line-item amounts and quantities unchanged.
+  - Update the target unit price if it is separately displayed.
+  - Update every displayed subtotal and repeated total consistently.
+  - Keep the full item table and totals visible and unobstructed.
+  - Avoid glare, severe folds, motion blur, and unreadably small text.
+  - Preserve business details, dates, reference numbers, and document layout.

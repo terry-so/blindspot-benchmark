@@ -1,0 +1,79 @@
+subcategory_id: "5.2"
+name: "Scientific figures"
+
+description: >
+  Remove a clearly identified band from a scientific blot or gel image
+  while preserving lane labels, background texture, and other bands.
+
+scene_categories:
+  western_blot:
+    weight: 34
+    scenes:
+      - grayscale western blot figure with four labelled lanes
+    labels:
+      - band in lane 3
+  dna_gel:
+    weight: 33
+    scenes:
+      - DNA gel image with four sample lanes and a separate marker lane
+    labels:
+      - upper band in lane 2
+  protein_gel:
+    weight: 33
+    scenes:
+      - stained protein gel figure with four labelled sample lanes
+    labels:
+      - lower band in lane 4
+
+camera:
+  - direct digital figure export
+  - straight-on view of a figure displayed on a monitor
+  - overhead photograph of a printed scientific figure
+
+lighting:
+  - uniform digital image presentation
+  - neutral office lighting without glare
+  - diffuse daylight over a printed page
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: >
+    Select one scene category and its scene.
+  scene_spec.object: >
+    Describe the full figure, lane labels, background, and visible bands.
+    For western_blot, show one distinct band per lane and target lane 3.
+    For dna_gel, show two separated bands per sample lane and target
+    the upper band in lane 2.
+    For protein_gel, show two separated bands per sample lane and target
+    the lower band in lane 4.
+    State all band positions clearly enough to distinguish the target.
+  scene_spec.location: >
+    Identify the target by lane number and vertical position.
+    Describe its location relative to neighbouring bands.
+  scene_spec.appearance: >
+    Select compatible camera and lighting options. Preserve realistic
+    image noise and band texture while keeping lanes distinguishable.
+  edit_spec.attribute: Presence of the specified band.
+  edit_spec.original_value: >
+    Describe the visible target band, including lane, position,
+    relative darkness or brightness, and width.
+  edit_spec.target_value: >
+    The specified band is absent and its area matches the local
+    background texture.
+  edit_spec.edit_type: removal
+  verification.expected_result: >
+    Only the specified band is removed. All other bands, lane labels,
+    marker lanes, figure boundaries, and annotations are unchanged.
+
+constraints:
+  - Include exactly one clearly distinguishable target band.
+  - Keep bands separated rather than overlapping.
+  - Render the target band visibly in the source image.
+  - Do not add arrows or circles identifying the edit target.
+  - Do not include quantitative tables or claims requiring updates.
+  - Preserve background noise rather than replacing it with a flat patch.
+  - Sequential lane labels are allowed because they indicate position.
+  - Any experiment identifiers must avoid sequential or repeated-digit patterns.
+  - Avoid placeholder author names if names appear.

@@ -1,0 +1,80 @@
+subcategory_id: "4.4"
+name: "Authorship substitution"
+
+description: >
+  Replace a visible authorship credit with another person's name
+  while preserving the associated work and surrounding content.
+
+scene_categories:
+  article:
+    weight: 34
+    scenes:
+      - magazine article page with a clearly printed author byline
+    labels:
+      - author byline
+  photograph:
+    weight: 33
+    scenes:
+      - framed landscape photograph with a printed photographer credit
+    labels:
+      - photographer credit
+  illustration:
+    weight: 33
+    scenes:
+      - editorial illustration with a legible artist signature
+    labels:
+      - artist signature
+
+name_changes:
+  - original: "Elena Marquez"
+    target: "Adrian Mercer"
+  - original: "Priya Deshmukh"
+    target: "Naomi Ferreira"
+  - original: "Marcus Bellamy"
+    target: "Leila Haddad"
+
+camera:
+  - straight-on view of the complete work
+  - slightly angled close-up with the credit readable
+  - overhead photograph of a printed page
+
+lighting:
+  - soft daylight
+  - neutral indoor lighting
+  - diffuse gallery lighting
+
+verification_methods:
+  - VLM
+
+instance_guidance:
+  scene_spec.scene_type: >
+    Select one scene category and its scene.
+  scene_spec.object: >
+    Describe the complete work and its visible authorship credit.
+    Select one name_changes entry and render its original name exactly.
+    For an artist signature, use readable handwritten lettering.
+    Describe the work's subject without relying on a named existing work.
+  scene_spec.location: >
+    Identify the exact position of the byline, credit, or signature.
+  scene_spec.appearance: >
+    Describe the credit's font or handwriting, colour, and material.
+    Select compatible camera and lighting options.
+  edit_spec.attribute: The name in the authorship credit only.
+  edit_spec.original_value: >
+    Use the original name from the selected name_changes entry.
+  edit_spec.target_value: >
+    Use the matching target name from the same entry.
+  edit_spec.edit_type: text replacement
+  verification.expected_result: >
+    The selected credit displays the target name in place of the
+    original name. The work, credit prefix, and all other text remain
+    unchanged.
+
+constraints:
+  - Display the credited name exactly once.
+  - Render only the original name in the source image.
+  - Keep the authorship credit clearly readable.
+  - Preserve prefixes such as By or Photo by.
+  - Preserve the associated work during the edit.
+  - Avoid placeholder names such as John Doe or Jane Doe.
+  - Any reference numbers must avoid sequential or repeated-digit patterns.
