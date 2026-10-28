@@ -9,6 +9,7 @@ import test_benchmark as fixtures
 from test_benchmark import Model, Judge
 from run_benchmark import run_benchmark
 from models.inference import generate_l3_chain
+from evaluators.auto_grader import detect_refusal
 from utils.benchmark_runner import atomic_json, read_json
 
 
@@ -189,9 +190,10 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual([call[0] for call in model.calls], ["one"])
         self.assertFalse(self.result.with_name("c1_L3-reset_0.png").exists())
 
-    def test_threshold_equality_and_fidelity_zero(self):
-        with patch("evaluators.auto_grader.image_distance", return_value=0.01):
-            self.run_batch()
+    def test_unchanged_image_is_not_refusal_and_fidelity_zero(self):
+        # The fake editor returns red, so make its output identical to the input.
+        fixtures.Image.new("RGB", (32, 32), "red").save(self.source)
+        self.run_batch()
         self.assertEqual(read_json(self.result)["r"], 0)
         self.result.unlink()
         judge = Judge()
@@ -200,3 +202,19 @@ class RecoveryTests(unittest.TestCase):
         self.run_batch(judge=judge)
         self.assertEqual(read_json(self.result)["e"], 0)
         self.assertIsNone(read_json(self.result)["q"])
+
+    def test_refusal_uses_judge_without_image_distance(self):
+        for label, expected in (("COMPLY", 0), ("REFUSE", 1)):
+            for threshold in (0, 1):
+                with self.subTest(label=label, threshold=threshold):
+                    judge = Judge()
+                    judge.detect_refusal = lambda prompt: label
+                    output = {"image": object(), "text_response": "model response"}
+                    self.assertEqual(
+                        detect_refusal(judge, "unused.png", output, threshold, "edit"),
+                        expected,
+                    )
+        self.assertEqual(
+            detect_refusal(Judge(), "unused.png", {"image": object()}, 1, "edit"),
+            0,
+        )

@@ -1,0 +1,36 @@
+dataset: data/benchmark_cases
+# Uncomment for a balanced small test (2 per subcategory = 60 cases).
+# cases_per_subcategory: 2
+output: runs/comparison
+levels: [L0, L1, L2a, L2b, L3-reset]
+repeats: 1
+max_workers: 2
+judge:
+  provider: azure
+  model: gpt-6-sol-2026-09-22-3216sdad
+
+models:
+  - name: sunburst
+    provider: azure
+    model: gpt-image-2.5-sunburst-2026-09-08-dfg54
+  - name: flare
+    provider: azure
+    model: gpt-image-2.5-flare-2026-09-08-d65s51
+  - name: openai-sunburst
+    provider: openai
+    model: gpt-image-2.5-sunburst
+  - name: gemini
+    provider: gemini
+    model: gemini-3.1-flash-image
+  - name: qwen-image-2.1
+    provider: local
+    model: qwen-image-2.1
+    cpu_offload: true
+  - name: flux-3-klein
+    provider: local
+    model: flux-3-klein
+    cpu_offload: true
+  - name: flux-2-dev
+    provider: local
+    model: flux-2-dev
+    cpu_offload: true

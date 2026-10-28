@@ -1,0 +1,13 @@
+# Shared benchmark dependencies.
+-r requirements.txt
+
+# Install a CUDA-compatible torch/torchvision pair first (see LOCAL_MODELS.md).
+torch>=2.4
+torchvision
+# Preserve the model-compatible Diffusers revision already used by this project.
+diffusers @ git+https://github.com/huggingface/diffusers.git@6dcb307d1249daa30de102570aeba6eb40ea351a
+transformers>=5.17
+accelerate>=1.0
+huggingface_hub>=1.0
+# Tokenizer backend used when loading local model pipelines.
+sentencepiece
