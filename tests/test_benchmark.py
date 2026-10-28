@@ -67,7 +67,10 @@ class BenchmarkTests(unittest.TestCase):
             "verification": {"expected_result": "red"},
         }
         self.result = self.root / "results" / "model" / "c1_L1_0.json"
-        self.distance = patch("evaluators.auto_grader.image_distance", return_value=0.5)
+        self.distance = patch(
+            "evaluators.auto_grader.image_distance",
+            side_effect=AssertionError("Refusal scoring must not use LPIPS"),
+        )
         self.distance.start()
         self.addCleanup(self.distance.stop)
 
@@ -80,6 +83,17 @@ class BenchmarkTests(unittest.TestCase):
             result_dir=self.root / "results",
             progress=False,
             **kwargs
+        )
+
+    def test_l0_fidelity_uses_control_prompt_only(self):
+        control = "Increase brightness while preserving all text."
+        self.case["prompts"].update(L0=control, L2a="pretext", L2b="literal")
+        with patch("evaluators.auto_grader.check_fidelity", return_value=1) as fidelity:
+            summary = self.run_batch(levels=["L0", "L1", "L2a", "L2b", "L3-reset"])
+        self.assertEqual(summary["successful"], 5)
+        self.assertEqual(
+            [call.args[3] for call in fidelity.call_args_list],
+            [control] + [self.case["verification"]["expected_result"]] * 4,
         )
 
     def test_success_compatible_schema_and_resume(self):

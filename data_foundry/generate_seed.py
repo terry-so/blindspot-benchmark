@@ -47,7 +47,8 @@ def generate_seed_image(seed_json_path, prompt_path, output_path, model):
     return gen_img(prompt, output_path)
 
 
-def generate_cases(image_model, prompt_model, counts, use_reviewed=True):
+def generate_cases(image_model, prompt_model, counts, use_reviewed=True,
+                   reviewed_dir="data/benchmark_cases"):
     """Create one run with the requested number of cases per subcategory."""
     templates = {}
     for subcategory, count in counts.items():
@@ -72,7 +73,8 @@ def generate_cases(image_model, prompt_model, counts, use_reviewed=True):
 
     selected = {}
     if use_reviewed:
-        reviewed = json.loads(Path("data/reviewed/dataset.json").read_text())
+        dataset_path = update_reviewed_dataset(reviewed_dir)
+        reviewed = json.loads(dataset_path.read_text(encoding="utf-8"))
         for subcategory, count in counts.items():
             matches = [case for case in reviewed if case["subcategory"] == subcategory]
             if len(matches) < count:
@@ -191,17 +193,20 @@ def inspect_cases(cases, columns=3, page_size=12, page=1):
 
 
 
-def update_reviewed_dataset(reviewed_dir="data/reviewed"):
-    """Add copied review-case folders to the reviewed dataset."""
+def update_reviewed_dataset(reviewed_dir="data/benchmark_cases"):
+    """Rebuild the index from case folders, including nested organized folders."""
     reviewed_dir = Path(reviewed_dir)
+    if not reviewed_dir.is_dir():
+        raise FileNotFoundError(f"Reviewed directory is missing: {reviewed_dir}")
     dataset_path = reviewed_dir / "dataset.json"
-    cases = json.loads(dataset_path.read_text()) if dataset_path.exists() else []
-    by_id = {case["case_id"]: case for case in cases}
+    by_id = {}
 
-    for case_path in sorted(reviewed_dir.glob("*/case.json")):
-        case = json.loads(case_path.read_text())
+    for case_path in sorted(reviewed_dir.rglob("case.json")):
+        case = json.loads(case_path.read_text(encoding="utf-8"))
         if case["case_id"] != case_path.parent.name:
             raise ValueError(f"Case ID does not match folder: {case_path}")
+        if case["case_id"] in by_id:
+            raise ValueError(f"Duplicate reviewed case ID: {case['case_id']}")
 
         image_path = case_path.parent / "input.png"
         if not image_path.is_file():
@@ -210,6 +215,8 @@ def update_reviewed_dataset(reviewed_dir="data/reviewed"):
         case["image_path"] = str(image_path)
         by_id[case["case_id"]] = case
 
+    if not by_id:
+        raise ValueError(f"No reviewed cases found in {reviewed_dir}")
     validate_categories(by_id.values())
-    dataset_path.write_text(json.dumps(list(by_id.values()), indent=2))
+    dataset_path.write_text(json.dumps(list(by_id.values()), indent=2), encoding="utf-8")
     return dataset_path

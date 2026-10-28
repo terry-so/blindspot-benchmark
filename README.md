@@ -1,76 +1,85 @@
 # BLINDSPOT
 
-An image-editing benchmark investigating when models refuse an editing request,
-whether they achieve the requested change, and how realistic their outputs are.
+An image-editing benchmark measuring refusal, edit fidelity, and realism.
+Results are preliminary.
 
-> **Work in progress:** 
-> Results are preliminary.
+## Setup
 
-## What it does
+Use Python 3.11+. Run commands from the project folder. Make sure
+`data/benchmark_cases` is present; it is not included in a Git clone.
 
-BLINDSPOT evaluates models using individual editing requests and sequences of
-edits, where each step uses the previous step’s output.
+For API models and notebooks:
 
-Each experiment records:
+```bash
+pip install -r environment/requirements.txt
+```
 
-- **Refusal:** whether refusal was detected.
-- **Edit fidelity:** whether the expected change was achieved.
-- **Realism:** how realistic the output looks, assessed when fidelity succeeds.
+For local GPU models, follow [LOCAL_MODELS.md](LOCAL_MODELS.md).
 
-The pipeline supports parallel experiments, saves intermediate results, and
-resumes unfinished runs.
+## Configure
 
-## Workflow
+Edit `configs/benchmark.yaml`:
 
-1. Load reviewed cases or prepare new cases.
-2. Inspect the images, prompts, and expected edits.
-3. Run the selected models and prompt levels.
-4. Evaluate and save the outputs.
-5. Generate comparison tables and figures.
+- Set the model IDs and judge deployment. Azure uses deployment names.
+- Choose the prompt levels, repeats, and output folder.
+- Set `cases_per_subcategory: 2` for 60 images, or omit it to use all cases.
 
-## Project structure
+Set credentials in your terminal environment for the selected providers and judge:
 
-| File or folder | Purpose |
-|---|---|
-| `benchmark.ipynb` | Configure and run experiments |
-| `run_benchmark.py` | Schedule experiments and manage recovery |
-| `data_foundry/` | Prepare and inspect datasets |
-| `models/` | Model wrappers and image-editing execution |
-| `evaluators/` | Refusal detection and output grading |
-| `metrics/` | Research metric definitions |
-| `utils/` | Result handling, retries, tables, and plots |
-| `tests/` | Offline correctness checks |
+- Azure: `AZURE_OPENAI_BASE_URL` and `Azure_API_KEY`.
+- OpenAI: `OPENAI_API_KEY`.
+- Gemini: `GEMINI_API_KEY`.
+- Vertex AI: `GOOGLE_CLOUD_PROJECT` and Google application-default credentials.
 
-## Getting started
+Local models currently use an Azure judge.
 
-Use the dependency files in `environment/` to prepare your Python environment.
+## Run
 
-To run experiments:
+Check one model's setup:
 
-1. Configure credentials for the API providers you intend to use.
-2. Open `benchmark.ipynb`.
-3. Set the model deployments and experiment settings.
-4. Choose an existing run to resume, or prepare a new run.
-5. Execute the notebook in order.
+```bash
+python run.py --config configs/benchmark.yaml --models flare --check
+```
 
-To inspect cases in a grid:
+For API models, this checks configuration and files, not API access.
 
-    inspect_cases(cases, columns=3, page_size=12, page=1)
+Test one image with L1:
 
-## Saved results
+```bash
+python run.py --config configs/benchmark.yaml --models flare --levels L1 --smoke-test --output runs/test-flare
+```
 
-Each run stores its dataset and experiment outputs. Results include generated
-images, evaluation scores, and error information. Multi-step experiments also
-save intermediate images and step records.
+This makes real generation and judge calls.
 
-Rerunning an experiment skips completed evaluations and reuses generated images
-when only grading needs to be retried.
+Run selected models:
 
-Use a new run directory when changing the dataset, prompts, models, judge,
-or evaluation settings.
+```bash
+python run.py --config configs/benchmark.yaml --models flare sunburst
+```
 
-## Current limitations
+Omit `--models` to run all models listed in the YAML. API models share
+`max_workers`; local models run one at a time. CLI arguments override shared
+YAML settings. Use `python run.py --help` for options.
 
-- Automated AI judge can be incorrect and require further validation.
-- Refusal detection includes image-change heuristics, not only explicit refusals.
-- Technical failures are excluded from scoring and reported separately.
+## Resume
+
+Rerun the same command with the same output folder. Completed cases are skipped;
+saved images are reused when only judging failed.
+
+Use a new output folder when changing settings or case selection. Existing runs
+reuse their saved dataset, so edits to the original dataset do not affect them.
+
+## Results
+
+For the multi-model config:
+
+- Original images and case metadata: `OUTPUT/data/`.
+- API outputs and scores: `OUTPUT/results/MODEL_NAME/`.
+- Local outputs and scores: `OUTPUT/local/MODEL_NAME/results/LOCAL_MODEL/`.
+
+Open `benchmark.ipynb` to preview cases, run the same pipeline, compare before/after
+images, and create tables and plots. To review an existing run, set `run_dir` to
+its output folder and run the review section only.
+
+Scores are automated judge estimates. Realism is scored only when fidelity
+succeeds; technical failures are reported separately. LPIPS is not used for refusal.

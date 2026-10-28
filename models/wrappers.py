@@ -1,85 +1,19 @@
+
 from openai import OpenAI, APIStatusError
 from typing import Any
 import os
 from io import BytesIO
 from PIL import Image
 from pathlib import Path
-import torch
 from google import genai
 from google.genai import types
 from google.genai.types import GenerateContentConfig, Modality, Part
 import yaml
 from pydantic import BaseModel
-import re
-import json
 import base64
 import random
 
-"""
-ALL MODELS MUST FOLLOW THE SAME OUTPUT FORMAT
-"""
-
-
-class FluxModel:
-    """
-    Flux model wrapper
-    """
-
-    def __init__(self, model_name: str = "black-forest-labs/FLUX.2-klein-4B"):
-        self.model_name = model_name
-
-        self.torch_dtype = torch.bfloat16
-        self.device = "cuda:0"
-
-        from diffusers import Flux2KleinPipeline
-
-        self.pipe = Flux2KleinPipeline.from_pretrained(
-            self.model_name, torch_dtype=self.torch_dtype
-        )
-        self.pipe.to(self.device)
-
-    def generate_edit(
-        self, prompt: str, input_image_path: str, output_image_path: str
-    ) -> dict[str, Any]:
-        """
-        Generate edit using FLUX.2 and save to output image path.
-        Also return dictionary containing status, text response and edited image.
-        """
-        output_dict = {
-            "status": "failed",
-            "text_response": None,
-            "image": None,
-            "error": None,
-        }
-
-        try:
-            with torch.inference_mode():
-                img = Image.open(input_image_path).convert("RGB")
-                output = self.pipe(
-                    prompt=prompt,
-                    generator=torch.Generator(device=self.device).manual_seed(42),
-                    image=img,
-                    num_inference_steps=4,
-                    guidance_scale=1.0,
-                ).images[0]
-
-            output.save(output_image_path)
-
-            output_dict["status"] = "success"
-            output_dict["text_response"] = None
-            output_dict["image"] = output
-            output_dict["error"] = None
-
-        except Exception as e:
-            output_dict["status"] = "failed"
-            output_dict["text_response"] = None
-            output_dict["image"] = None
-            output_dict["error"] = str(e)
-
-        return output_dict
-
-
-class GeminiModel:
+class GeminiImageEditor:
     """
     Gemini model wrapper
     """
@@ -305,17 +239,8 @@ class GeminiModel:
         )
 
 
-class Azure_gpt_image:
-    def __init__(
-        self,
-        model_name="gpt-image-2.5-sunburst-2026-09-08-dfg54",
-    ):
-        self.model_name = model_name
-        self.client = OpenAI(
-            base_url=os.environ["AZURE_OPENAI_BASE_URL"],
-            max_retries=0,
-            api_key=os.environ["Azure_API_KEY"],
-        )
+class _OpenAIImageBase:
+    """Shared image operations for the OpenAI and Azure Image APIs."""
 
     @staticmethod
     def _image_from_response(response):
@@ -399,280 +324,33 @@ class Azure_gpt_image:
         return output
 
 
-"""
-ADD OTHER MODELS HERE
-"""
-
-
-class VLMJudge:
-    """
-    VLM Judge Wrapper
-    """
-
-    def __init__(self, model_name: str = "gemini-3.5-flash"):
-        self.API_key = os.environ.get("GEMINI_API_KEY")
-        self.model_name = model_name
-        self.client = genai.Client(
-            enterprise=True,
-            project=os.environ["GOOGLE_CLOUD_PROJECT"],
-            location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
-        )
-
-    def judge_realism(self, image_path):
-        image = Image.open(image_path)
-        with open(
-            Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt",
-            "r",
-            encoding="utf-8",
-        ) as f:
-            prompt = f.read()
-        response = self.client.models.generate_content(
-            model=self.model_name,
-            contents=[prompt, image],
-        )
-
-        text = response.text or ""
-        match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
-
-        if not match:
-            raise ValueError(f"Judge returned an invalid score: {text!r}")
-
-        return int(match.group(1))
-
-    def judge_fidelity(self, original_image_path, edited_image_path, prompt):
-
-        with Image.open(original_image_path) as original, Image.open(
-            edited_image_path
-        ) as edited:
-            response = self.client.models.generate_content(
-                model=self.model_name, contents=[prompt, original, edited]
-            )
-
-        text = response.text or ""
-        match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
-
-        if not match:
-            raise ValueError(f"Fidelity judge returned an invalid score: {text!r}")
-
-        return int(match.group(1))
-
-    def detect_refusal(self, prompt):
-        response = self.client.models.generate_content(
-            model=self.model_name, contents=[prompt]
-        )
-        return response.text
-
-
-class Qwen3:
-    def __init__(self, model_name: str = "Qwen/Qwen3-VL-2B-Instruct"):
-        self.model_name = model_name
-        from transformers import AutoProcessor, AutoModelForMultimodalLM
-
-        self.processor = AutoProcessor.from_pretrained(self.model_name)
-        self.model = AutoModelForMultimodalLM.from_pretrained(
-            self.model_name, device_map="auto"
-        )
-
-    def judge_realism(self, image_path):
-        try:
-            image = Image.open(image_path)
-            with open(
-                Path(__file__).resolve().parents[1]
-                / "prompts/realism_judge_prompt.txt",
-                "r",
-                encoding="utf-8",
-            ) as f:
-                prompt = f.read()
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "image": image,
-                        },
-                        {
-                            "type": "text",
-                            "text": prompt,
-                        },
-                    ],
-                }
-            ]
-
-            inputs = self.processor.apply_chat_template(
-                messages,
-                add_generation_prompt=True,
-                tokenize=True,
-                return_dict=True,
-                return_tensors="pt",
-            ).to(self.model.device)
-
-            with torch.inference_mode():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=40,
-                    do_sample=False,
-                    stop_strings=["</OUTPUT>"],
-                    tokenizer=self.processor.tokenizer,
-                )
-
-            generated = outputs[:, inputs["input_ids"].shape[-1] :]
-
-            result = self.processor.batch_decode(
-                generated,
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=False,
-            )[0]
-            match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", result, re.DOTALL)
-
-            if match:
-                score = match.group(1)
-
-            return int(score)
-
-        except Exception as e:
-            print(str(e))
-
-    def judge_fidelity(self, original_image_path, edited_image_path, prompt):
-        try:
-            original_image = Image.open(original_image_path).convert("RGB")
-            edited_image = Image.open(edited_image_path).convert("RGB")
-
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {"type": "image", "image": original_image},
-                        {"type": "image", "image": edited_image},
-                    ],
-                }
-            ]
-
-            inputs = self.processor.apply_chat_template(
-                messages,
-                add_generation_prompt=True,
-                tokenize=True,
-                return_dict=True,
-                return_tensors="pt",
-            ).to(self.model.device)
-
-            with torch.inference_mode():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=200,
-                    do_sample=False,
-                    stop_strings=["</OUTPUT>"],
-                    tokenizer=self.processor.tokenizer,
-                )
-
-            generated_tokens = outputs[:, inputs["input_ids"].shape[-1] :]
-
-            result = self.processor.batch_decode(
-                generated_tokens,
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=False,
-            )[0]
-
-            match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", result, re.DOTALL)
-
-            if match:
-                score = match.group(1)
-
-            return int(score)
-
-        except Exception as e:
-            print(str(e))
-            return None
-
-    def detect_refusal(self, prompt):
-        try:
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": prompt,
-                        }
-                    ],
-                }
-            ]
-
-            inputs = self.processor.apply_chat_template(
-                messages,
-                add_generation_prompt=True,
-                tokenize=True,
-                return_dict=True,
-                return_tensors="pt",
-            ).to(self.model.device)
-
-            with torch.inference_mode():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=100,
-                    do_sample=False,
-                )
-
-            generated_tokens = outputs[:, inputs["input_ids"].shape[-1] :]
-
-            response = self.processor.batch_decode(
-                generated_tokens,
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=False,
-            )[0]
-
-            return response.strip()
-
-        except Exception as e:
-            print(str(e))
-            return None
-
-
-class OpenAIJudge:
-    """OpenAI-compatible Azure judge; deployment and endpoint are configuration."""
-
-    def __init__(self, model_name, base_url=None, api_key=None):
+class AzureImageEditor(_OpenAIImageBase):
+    def __init__(
+        self,
+        model_name="gpt-image-2.5-sunburst-2026-09-08-dfg54",
+    ):
         self.model_name = model_name
         self.client = OpenAI(
-            base_url=base_url or os.environ["AZURE_OPENAI_BASE_URL"],
-            api_key=api_key or os.environ["Azure_API_KEY"],
+            base_url=os.environ["AZURE_OPENAI_BASE_URL"],
+            max_retries=0,
+            api_key=os.environ["Azure_API_KEY"],
+        )
+
+
+class OpenAIImageEditor(_OpenAIImageBase):
+    """Direct OpenAI Image API; shares image decoding and safety handling with Azure."""
+
+    def __init__(self, model_name):
+        self.model_name = model_name
+        self.client = OpenAI(
+            base_url="https://api.openai.com/v1",
+            api_key=os.environ["OPENAI_API_KEY"],
             max_retries=0,
         )
 
-    @staticmethod
-    def _image(path):
-        with Image.open(path) as image:
-            buffer = BytesIO()
-            image.convert("RGB").save(buffer, format="PNG")
-        encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
-        return {
-            "type": "image_url",
-            "image_url": {"url": "data:image/png;base64," + encoded},
-        }
 
-    def _ask(self, prompt, paths=()):
-        content = [{"type": "text", "text": prompt}] + [self._image(p) for p in paths]
-        response = self.client.chat.completions.create(
-            model=self.model_name, messages=[{"role": "user", "content": content}]
-        )
-        return response.choices[0].message.content or ""
+GeminiModel = GeminiImageEditor
+Azure_gpt_image = AzureImageEditor
+OpenAIImage = OpenAIImageEditor
 
-    def detect_refusal(self, prompt):
-        return self._ask(prompt)
-
-    @staticmethod
-    def _score(text):
-        match = re.search(r"<OUTPUT>\s*(\d+)\s*</OUTPUT>", text)
-        if not match:
-            raise ValueError(f"Judge returned an invalid score: {text!r}")
-        return int(match.group(1))
-
-    def judge_fidelity(self, original_image_path, edited_image_path, prompt):
-        return self._score(self._ask(prompt, (original_image_path, edited_image_path)))
-
-    def judge_realism(self, image_path):
-        prompt = (
-            Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt"
-        ).read_text(encoding="utf-8")
-        return self._score(self._ask(prompt, (image_path,)))
+from models.judges import VLMJudge, Qwen3, OpenAIJudge

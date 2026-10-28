@@ -93,6 +93,7 @@ def run_experiment(
                 str(output_path),
                 threshold,
                 refusal_score=refusal_score,
+                level=level,
             )
             result = response | labels
     except Exception as exc:
