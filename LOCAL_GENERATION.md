@@ -1,10 +1,9 @@
 # Run local edits only
 
 Generate images for Qwen-Image-2.1, FLUX.3 Klein, and FLUX.2 dev.
-No judging or Azure credentials are required.
 
-Use Linux, Python 3.11+, and a BF16-capable NVIDIA GPU.
-The commands below use `run_local.py --skip-judge` for both the smoke test and full run.
+
+Use Linux, Python 3.11+.
 
 1. Extract `data.zip` in the project root so `data/benchmark_cases` exists.
    Run all commands below from the project root.
@@ -16,8 +15,7 @@ The commands below use `run_local.py --skip-judge` for both the smoke test and f
    hf auth login
    ```
 
-   Accept any required Hugging Face access terms for the three models and the
-   `black-forest-labs/flux-3-image-klein-pup` prompt upsampler.
+   Accept any required Hugging Face access terms for the three models.
 
 3. Verify the GPU:
 
@@ -53,8 +51,20 @@ The commands below use `run_local.py --skip-judge` for both the smoke test and f
 
 Models run sequentially. L3 uses every step stored in each case, with each
 step editing the previous output. It stops if image generation fails.
-Refusal, fidelity, and realism scores remain unset.
+
 
 Rerun the same command to resume. Use a new output folder if settings change.
 Please return the complete `runs/local-generation` folder, including original
 images, intermediate L3 images, result metadata, settings, and package versions.
+
+**Suggested hardware** (According to AI)
+
+| Component | target |
+|---|---|
+| GPU | One A100 80 GB or H100 80 GB |
+| System RAM | 128 GB minimum planning target; 192–256 GB preferred |
+| CPU | 8–16 cores |
+| Free disk space | 500 GB for all model downloads, caches, and outputs |
+| OS | Linux with a working NVIDIA driver and CUDA-enabled PyTorch |
+| Configuration | `cpu_offload: true` |
+
