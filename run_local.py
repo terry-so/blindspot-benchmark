@@ -58,9 +58,10 @@ def main(argv=None):
     parser.add_argument("--cpu-offload", action="store_true")
     parser.add_argument("--smoke-test", action="store_true", help="Run the first case, one repeat, with the same judge")
     parser.add_argument("--check", action="store_true", help="Check inputs, CUDA, imports and model access without loading weights")
+    parser.add_argument("--skip-judge", action="store_true", help="Save generations without judging or Azure access")
     parser.add_argument("--snapshot-root", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
-    if not args.judge or not all(os.environ.get(key) for key in ("AZURE_OPENAI_BASE_URL", "Azure_API_KEY")):
+    if not args.skip_judge and (not args.judge or not all(os.environ.get(key) for key in ("AZURE_OPENAI_BASE_URL", "Azure_API_KEY"))):
         parser.error("Set JUDGE_MODEL (or --judge), AZURE_OPENAI_BASE_URL and Azure_API_KEY")
     snapshot_root = args.snapshot_root or args.output
     cases = run_cases(snapshot_root, args.dataset, args.cases_per_subcategory, args.smoke_test)
@@ -70,7 +71,6 @@ def main(argv=None):
 
     import torch
     from huggingface_hub import HfApi
-    from models.wrappers import OpenAIJudge
 
     if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
         raise RuntimeError("A CUDA GPU supporting BF16 is required. Check nvidia-smi and your PyTorch installation.")
@@ -91,18 +91,21 @@ def main(argv=None):
     for repo, revision in revisions.items():
         HfApi().auth_check(repo_id=repo, repo_type="model")
     settings = {
-        "model": args.model, "judge": args.judge,
-        "judge_endpoint": os.environ["AZURE_OPENAI_BASE_URL"],
+        "model": args.model, "judge": None if args.skip_judge else args.judge,
+        "judge_endpoint": None if args.skip_judge else os.environ["AZURE_OPENAI_BASE_URL"],
         "dataset_sha256": fingerprint(cases),
         "case_ids": [case["case_id"] for case in cases], "levels": args.levels,
         "repeats": args.repeats, "seed": args.seed, "cpu_offload": args.cpu_offload,
         "revisions": revisions,
         "packages": {name: version(name) for name in ("torch", "diffusers", "transformers", "accelerate", "openai")},
     }
+    if args.skip_judge:
+        settings["generation_only"] = True
     if previous and previous != settings:
         raise ValueError("Run settings changed. Use a new --output directory.")
     if args.check:
-        print("Preflight passed. Judge credentials are present; the smoke test verifies API access and inference.")
+        print("Preflight passed. Run the smoke test to verify inference." if args.skip_judge else
+              "Preflight passed. Judge credentials are present; the smoke test verifies API access and inference.")
         return 0
     if not previous and args.output.exists() and any(p.name != "data" for p in args.output.iterdir()):
         raise ValueError("Output directory must be empty for a new run")
@@ -112,18 +115,22 @@ def main(argv=None):
         (args.output / "environment.txt").write_text(
             subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True), encoding="utf-8"
         )
-    judge = OpenAIJudge(args.judge)
-    # Validate the configured API before spending time loading GPU weights.
-    answer = judge.detect_refusal("Reply with exactly COMPLY.")
-    if "COMPLY" not in answer:
-        raise RuntimeError(f"Judge connectivity check returned an unexpected response: {answer!r}")
+    judge = None
+    if not args.skip_judge:
+        from models.wrappers import OpenAIJudge
+        judge = OpenAIJudge(args.judge)
+        # Validate the configured API before spending time loading GPU weights.
+        answer = judge.detect_refusal("Reply with exactly COMPLY.")
+        if "COMPLY" not in answer:
+            raise RuntimeError(f"Judge connectivity check returned an unexpected response: {answer!r}")
     editor = LocalEditor(
         args.model, revisions[MODEL_IDS[args.model]], revisions.get(PUP_ID),
         seed=args.seed, cpu_offload=args.cpu_offload,
     )
+    options = {"generation_only": True} if args.skip_judge else {}
     summary = run_benchmark(
         cases, models={args.model: editor}, judge=judge, levels=args.levels,
-        repeats=args.repeats, result_dir=args.output / "results", max_workers=1,
+        repeats=args.repeats, result_dir=args.output / "results", max_workers=1, **options,
     )
     print(json.dumps(summary, indent=2))
     return 1 if summary["failed"] or summary["unavailable"] else 0

@@ -307,6 +307,9 @@ class _OpenAIImageBase:
                     prompt=prompt,
                 )
 
+            usage = getattr(response, "usage", None)
+            if usage is not None:
+                output["usage"] = usage.model_dump(mode="json")
             image = self._image_from_response(response)
             image.save(output_image_path)
 

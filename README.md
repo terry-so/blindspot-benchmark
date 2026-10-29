@@ -83,3 +83,20 @@ its output folder and run the review section only.
 
 Scores are automated judge estimates. Realism is scored only when fidelity
 succeeds; technical failures are reported separately. LPIPS is not used for refusal.
+
+## Measure API generation cost
+
+New Flare/Sunburst results include token usage when the API returns it. Run a small pilot:
+
+```bash
+python run.py --config configs/benchmark.yaml --models flare sunburst --levels L1 --smoke-test --output runs/cost-pilot-flare-sunburst
+python estimate_image_cost.py runs/cost-pilot-flare-sunburst --planned-edits 4200
+```
+
+The report defaults to USD per million tokens: text input 5, image input 8,
+image output 30. Override with `--text-rate`, `--image-rate`, and `--output-rate`
+to match your Azure deployment. Judge costs and unlogged retries are excluded;
+missing usage is unknown cost. Check Azure billing for actual charges.
+The 4,200-call projection assumes 600 cases, L0/L1/L2a/L2b, and three L3 steps
+per case, with one repeat and no early stopping. A one-case L1 pilot is only an
+initial measurement; sample all levels and subcategories before fixing a budget.

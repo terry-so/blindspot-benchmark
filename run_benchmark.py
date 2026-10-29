@@ -25,6 +25,7 @@ def run_experiment(
     result_dir,
     threshold,
     regrade_only=False,
+    generation_only=False,
 ):
     """Recover or generate one output, then grade it and save the result."""
     result_path = Path(result_dir) / name / f"{case['case_id']}_{level}_{repeat}.json"
@@ -32,6 +33,10 @@ def run_experiment(
     saved = read_json(result_path)
     if saved.get("status") == "ok":
         return "skipped"
+    if generation_only and saved.get("status") == "generated":
+        from utils.benchmark_runner import valid_image
+        if valid_image(output_path):
+            return "skipped"
 
     recover = can_regrade(saved, output_path, level)
     if regrade_only and not recover:
@@ -59,7 +64,7 @@ def run_experiment(
         atomic_json(result_path, metadata | pending)
         output_path.unlink(missing_ok=True)
 
-    refusal_score = 0 if recover and level == "L3-reset" else None
+    refusal_score = 0 if recover and level == "L3-reset" and not generation_only else None
     try:
         judge = make_judge()
         if recover:
@@ -77,7 +82,7 @@ def run_experiment(
         if "status" in response:
             result = response
         else:
-            if level == "L3-reset":
+            if level == "L3-reset" and not generation_only:
                 refusal_score = 0  # Every step already passed refusal detection.
             atomic_json(result_path, metadata | response | pending)
             instruction = (
@@ -85,16 +90,21 @@ def run_experiment(
                 if level == "L3-reset"
                 else case["prompts"][level]
             )
-            labels = grade_output(
-                judge,
-                case,
-                instruction,
-                output,
-                str(output_path),
-                threshold,
-                refusal_score=refusal_score,
-                level=level,
-            )
+            if generation_only:
+                if output.get("status") != "success" or output.get("image") is None:
+                    raise RuntimeError(output.get("error") or "Generation returned no image")
+                labels = {"status": "generated", "r": None, "e": None, "q": None}
+            else:
+                labels = grade_output(
+                    judge,
+                    case,
+                    instruction,
+                    output,
+                    str(output_path),
+                    threshold,
+                    refusal_score=refusal_score,
+                    level=level,
+                )
             result = response | labels
     except Exception as exc:
         # A completed generation remains available if construction/grading fails.
@@ -108,7 +118,7 @@ def run_experiment(
         )
 
     atomic_json(result_path, metadata | result)
-    if result["status"] != "ok":
+    if result["status"] not in {"ok", "generated"}:
         return "failed"
     return "refused" if result["r"] == 1 else "successful"
 
@@ -127,6 +137,7 @@ def run_benchmark(
     judge_factory=None,
     regrade_only=False,
     progress=True,
+    generation_only=False,
 ):
     """Validate, schedule experiments, and count outcomes.
 
@@ -141,7 +152,9 @@ def run_benchmark(
         raise ValueError("Use models OR model_factories, not both")
     if judge is not None and judge_factory is not None:
         raise ValueError("Use judge OR judge_factory, not both")
-    if judge is None and judge_factory is None:
+    if generation_only and (judge is not None or judge_factory is not None or regrade_only):
+        raise ValueError("Generation-only runs require no judge and no regrade_only")
+    if judge is None and judge_factory is None and not generation_only:
         raise ValueError("Provide a judge or judge_factory")
     if max_workers > 1 and (models or judge_factory is None):
         raise ValueError("Parallel runs require model_factories and judge_factory")
@@ -179,6 +192,7 @@ def run_benchmark(
                 result_dir=result_dir,
                 threshold=thresholds,
                 regrade_only=regrade_only,
+                generation_only=generation_only,
             )
             for case, name, level, repeat in jobs
         ]

@@ -190,6 +190,14 @@ class LocalModelTests(unittest.TestCase):
             self.assertEqual(main(args + ["--model", "flux-2-dev", "--output", str(self.root / "flux2")]), 0)
             self.assertEqual(editor.call_args.args[:2], ("flux-2-dev", "fixed-revision"))
             self.assertIsNone(editor.call_args.args[2])
+            before = judge.detect_refusal.call_count
+            with patch.dict("os.environ", {}, clear=True):
+                generation_args = args + ["--skip-judge", "--output", str(self.root / "generation")]
+                self.assertEqual(main(generation_args + ["--check"]), 0)
+                self.assertEqual(main(generation_args), 0)
+            self.assertEqual(judge.detect_refusal.call_count, before)
+            self.assertIsNone(benchmark.call_args.kwargs["judge"])
+            self.assertTrue(benchmark.call_args.kwargs["generation_only"])
         self.assertNotIn("test-secret", (output / "settings.json").read_text())
 
 
