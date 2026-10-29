@@ -82,4 +82,5 @@ images, and create tables and plots. To review an existing run, set `run_dir` to
 its output folder and run the review section only.
 
 Scores are automated judge estimates. Realism is scored only when fidelity
-succeeds; technical failures are reported separately.
+succeeds; technical failures are reported separately. LPIPS is not used for refusal.
+

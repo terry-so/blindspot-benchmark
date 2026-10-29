@@ -120,6 +120,7 @@ def load_generation(saved, image_path):
             "block_reason",
             "finish_reason",
             "safety_block",
+            "usage",
         )
     }
     for key in ("chain_length", "steps", "first_refusal_step", "failed_step"):
@@ -140,7 +141,7 @@ def load_generation(saved, image_path):
 
 def response_metadata(output):
     """Fields shared by single edits, L3 steps, and generation checkpoints."""
-    return {
+    metadata = {
         "execution_status": output["status"],
         "text_response": output.get("text_response"),
         "execution_error": output.get("error"),
@@ -148,3 +149,6 @@ def response_metadata(output):
         "finish_reason": output.get("finish_reason"),
         "safety_block": output.get("safety_block", False),
     }
+    if output.get("usage") is not None:
+        metadata["usage"] = output["usage"]
+    return metadata

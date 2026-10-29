@@ -62,12 +62,19 @@ class OpenAIImageTests(WrapperTests):
         buffer = BytesIO()
         Image.new('RGB', (8, 8), 'red').save(buffer, format='PNG')
         self.model.client.images.edit.return_value = SimpleNamespace(
-            data=[SimpleNamespace(b64_json=base64.b64encode(buffer.getvalue()).decode())])
+            data=[SimpleNamespace(b64_json=base64.b64encode(buffer.getvalue()).decode())],
+            usage=SimpleNamespace(model_dump=lambda **kwargs: {
+                'input_tokens_details': {'text_tokens': 10, 'image_tokens': 20},
+                'output_tokens': 30,
+            }))
         with tempfile.TemporaryDirectory() as folder:
             target = Path(folder) / 'output.png'
             result = self.model.generate_edit('change color', __file__, target)
             self.assertEqual(result['status'], 'success')
             self.assertFalse(result['safety_block'])
+            self.assertEqual(result['usage']['output_tokens'], 30)
+            from utils.benchmark_runner import response_metadata
+            self.assertEqual(response_metadata(result)['usage'], result['usage'])
             with Image.open(target) as saved:
                 self.assertEqual(saved.size, (8, 8))
             args = self.model.client.images.edit.call_args.kwargs
