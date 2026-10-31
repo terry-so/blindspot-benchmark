@@ -1,7 +1,7 @@
 # Shared benchmark dependencies.
 -r requirements.txt
 
-# Install a CUDA-compatible torch/torchvision pair first (see LOCAL_MODELS.md).
+# Install a CUDA-compatible torch/torchvision pair first (see README.md).
 torch>=2.4
 torchvision
 # Preserve the model-compatible Diffusers revision already used by this project.

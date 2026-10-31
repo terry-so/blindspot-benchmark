@@ -9,13 +9,19 @@ judge:
   provider: azure
   model: gpt-6-sol-2026-09-22-3216sdad
 
+# Optional per-model pricing: USD per million tokens. Confirm your deployment rates.
+# Example using the earlier pilot assumptions (not verified billing rates):
+#   pricing: {text_input: 5, image_input: 8, output: 30}
 models:
   - name: sunburst
     provider: azure
     model: gpt-image-2.5-sunburst-2026-09-08-dfg54
+    # Earlier pilot rates; confirm against Azure billing.
+    pricing: {text_input: 5, image_input: 8, output: 30}
   - name: flare
     provider: azure
     model: gpt-image-2.5-flare-2026-09-08-d65s51
+    pricing: {text_input: 5, image_input: 8, output: 30}
   - name: openai-sunburst
     provider: openai
     model: gpt-image-2.5-sunburst

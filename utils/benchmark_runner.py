@@ -4,6 +4,7 @@ import json
 import math
 import os
 import tempfile
+import time
 from pathlib import Path
 
 from PIL import Image
@@ -19,7 +20,15 @@ def atomic_json(path, value):
             json.dump(value, stream, indent=2, allow_nan=False)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(name, path)
+        for attempt in range(6):
+            try:
+                os.replace(name, path)
+                break
+            except PermissionError:
+                if attempt == 5:
+                    raise
+                # Windows readers/scanners can briefly lock the destination.
+                time.sleep(0.1 * 2**attempt)
     finally:
         Path(name).unlink(missing_ok=True)
 
@@ -75,9 +84,6 @@ def validate_inputs(cases, names, levels, repeats, max_workers, threshold):
     for case in cases:
         if not valid_image(case["image_path"]):
             raise ValueError(f'Unreadable source image: {case["image_path"]}')
-        target = case["verification"]["expected_result"]
-        if not isinstance(target, str) or not target.strip():
-            raise ValueError("Missing expected_result")
         for level in levels:
             prompts = (
                 case["prompts"]["L3"]
@@ -149,6 +155,8 @@ def response_metadata(output):
         "finish_reason": output.get("finish_reason"),
         "safety_block": output.get("safety_block", False),
     }
+    if output.get("technical_error"):
+        metadata["technical_error"] = True
     if output.get("usage") is not None:
         metadata["usage"] = output["usage"]
     return metadata

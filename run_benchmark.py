@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from evaluators.auto_grader import grade_output
+from utils.costs import add_costs, write_cost_summary, validate_pricing
 from models.inference import generate_single_edit, generate_l3_chain
 from utils.benchmark_runner import (
     atomic_json,
@@ -26,16 +27,22 @@ def run_experiment(
     threshold,
     regrade_only=False,
     generation_only=False,
+    pricing=None,
 ):
     """Recover or generate one output, then grade it and save the result."""
     result_path = Path(result_dir) / name / f"{case['case_id']}_{level}_{repeat}.json"
     output_path = result_path.with_suffix(".png")
     saved = read_json(result_path)
+    if pricing is None:
+        pricing = saved.get('generation_pricing')
+    if saved:
+        add_costs(saved, pricing)
+        atomic_json(result_path, saved)
     if saved.get("status") == "ok":
         return "skipped"
     if generation_only and saved.get("status") == "generated":
         from utils.benchmark_runner import valid_image
-        if valid_image(output_path):
+        if saved.get("image_returned") is False or valid_image(output_path):
             return "skipped"
 
     recover = can_regrade(saved, output_path, level)
@@ -64,9 +71,9 @@ def run_experiment(
         atomic_json(result_path, metadata | pending)
         output_path.unlink(missing_ok=True)
 
-    refusal_score = 0 if recover and level == "L3-reset" and not generation_only else None
+    refusal_score = 0 if recover and level == "L3-reset" else None
     try:
-        judge = make_judge()
+        judge = make_judge() if not generation_only or level == "L3-reset" else None
         if recover:
             output, response = load_generation(saved, output_path)
         elif level == "L3-reset":
@@ -82,7 +89,7 @@ def run_experiment(
         if "status" in response:
             result = response
         else:
-            if level == "L3-reset" and not generation_only:
+            if level == "L3-reset":
                 refusal_score = 0  # Every step already passed refusal detection.
             atomic_json(result_path, metadata | response | pending)
             instruction = (
@@ -91,9 +98,10 @@ def run_experiment(
                 else case["prompts"][level]
             )
             if generation_only:
-                if output.get("status") != "success" or output.get("image") is None:
-                    raise RuntimeError(output.get("error") or "Generation returned no image")
-                labels = {"status": "generated", "r": None, "e": None, "q": None}
+                if output.get("technical_error"):
+                    raise RuntimeError(output.get("error") or "Generation failed")
+                labels = {"status": "generated", "r": refusal_score, "e": None, "q": None,
+                          "image_returned": output.get("image") is not None}
             else:
                 labels = grade_output(
                     judge,
@@ -117,6 +125,7 @@ def run_experiment(
             error=str(exc),
         )
 
+    add_costs(result, pricing)
     atomic_json(result_path, metadata | result)
     if result["status"] not in {"ok", "generated"}:
         return "failed"
@@ -138,6 +147,7 @@ def run_benchmark(
     regrade_only=False,
     progress=True,
     generation_only=False,
+    pricing=None,
 ):
     """Validate, schedule experiments, and count outcomes.
 
@@ -146,17 +156,20 @@ def run_benchmark(
     directory at a time. The legacy 'successful' count means non-refused;
     fidelity success is recorded separately in each result's e score.
     """
+    pricing = pricing or {}
+    for rates in pricing.values():
+        validate_pricing(rates)
     models = models or {}
     model_factories = model_factories or {}
     if models and model_factories:
         raise ValueError("Use models OR model_factories, not both")
     if judge is not None and judge_factory is not None:
         raise ValueError("Use judge OR judge_factory, not both")
-    if generation_only and (judge is not None or judge_factory is not None or regrade_only):
+    if generation_only and regrade_only:
         raise ValueError("Generation-only runs require no judge and no regrade_only")
     if judge is None and judge_factory is None and not generation_only:
         raise ValueError("Provide a judge or judge_factory")
-    if max_workers > 1 and (models or judge_factory is None):
+    if max_workers > 1 and (models or (judge_factory is None and not generation_only)):
         raise ValueError("Parallel runs require model_factories and judge_factory")
 
     # Normalize the sequential object interface once, at the entry point.
@@ -193,6 +206,7 @@ def run_benchmark(
                 threshold=thresholds,
                 regrade_only=regrade_only,
                 generation_only=generation_only,
+                pricing=pricing.get(name),
             )
             for case, name, level, repeat in jobs
         ]
@@ -200,4 +214,5 @@ def run_benchmark(
             summary[future.result()] += 1
             if progress:
                 print(f"{completed}/{len(jobs)} finished", flush=True)
+    write_cost_summary(result_dir)
     return summary

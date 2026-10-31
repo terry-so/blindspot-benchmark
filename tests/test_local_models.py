@@ -136,7 +136,7 @@ class LocalModelTests(unittest.TestCase):
         judge.judge_realism.return_value = 4
         case = {
             "case_id": "c1", "domain": "D1", "subcategory": "1.1",
-            "image_path": str(self.source), "prompts": {"L3": ["one", "two"]},
+            "image_path": str(self.source), "prompts": {"L2b": "red", "L3": ["one", "two"]},
             "verification": {"expected_result": "red"},
         }
         kwargs = dict(models={"qwen-image-2.1": editor}, judge=judge, levels=["L3-reset"],
@@ -192,11 +192,11 @@ class LocalModelTests(unittest.TestCase):
             self.assertIsNone(editor.call_args.args[2])
             before = judge.detect_refusal.call_count
             with patch.dict("os.environ", {}, clear=True):
-                generation_args = args + ["--skip-judge", "--output", str(self.root / "generation")]
+                generation_args = args + ["--output", str(self.root / "generation")]
                 self.assertEqual(main(generation_args + ["--check"]), 0)
                 self.assertEqual(main(generation_args), 0)
             self.assertEqual(judge.detect_refusal.call_count, before)
-            self.assertIsNone(benchmark.call_args.kwargs["judge"])
+            self.assertIsNone(benchmark.call_args.kwargs.get("judge"))
             self.assertTrue(benchmark.call_args.kwargs["generation_only"])
         self.assertNotIn("test-secret", (output / "settings.json").read_text())
 

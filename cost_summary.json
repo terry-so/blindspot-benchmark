@@ -1,0 +1,15 @@
+{
+  "scope": "Recorded generation calls only; excludes judges, unlogged retries, and overwritten attempts. Totals include priced calls only.",
+  "models": {
+    "model": {
+      "estimated_cost_usd": null,
+      "priced_calls": 0,
+      "unpriced_calls": 1
+    },
+    "local": {
+      "estimated_cost_usd": null,
+      "priced_calls": 0,
+      "unpriced_calls": 1
+    }
+  }
+}

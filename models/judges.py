@@ -5,6 +5,7 @@ from io import BytesIO
 import os
 from pathlib import Path
 import re
+from urllib.parse import urlsplit
 
 from google import genai
 from openai import OpenAI
@@ -284,8 +285,44 @@ class OpenAIJudge:
     def judge_fidelity(self, original_image_path, edited_image_path, prompt):
         return self._score(self._ask(prompt, (original_image_path, edited_image_path)))
 
-    def judge_realism(self, image_path):
-        prompt = (
-            Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt"
-        ).read_text(encoding="utf-8")
+    def judge_realism(self, image_path, prompt=None):
+        if prompt is None:
+            prompt = (
+                Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt"
+            ).read_text(encoding="utf-8")
         return self._score(self._ask(prompt, (image_path,)))
+
+
+class ClaudeJudge(OpenAIJudge):
+    """Claude on Azure Foundry, using Messages instead of Chat Completions."""
+
+    def __init__(self, model_name, base_url=None, api_key=None):
+        from anthropic import AnthropicFoundry
+
+        endpoint = os.environ.get('ANTHROPIC_FOUNDRY_BASE_URL')
+        if not endpoint:
+            url = urlsplit(base_url or os.environ['AZURE_OPENAI_BASE_URL'])
+            host = url.hostname or ''
+            suffixes = ('.services.ai.azure.com', '.openai.azure.com', '.cognitiveservices.azure.com')
+            suffix = next((s for s in suffixes if host.endswith(s)), None)
+            if url.scheme != 'https' or not suffix or url.port or url.username or url.password:
+                raise ValueError('Set ANTHROPIC_FOUNDRY_BASE_URL to the Claude base URL for this custom endpoint')
+            resource = host[:-len(suffix)]
+            endpoint = f'https://{resource}.services.ai.azure.com/anthropic'
+        self.model_name = model_name
+        self.client = AnthropicFoundry(
+            base_url=endpoint, api_key=api_key or os.environ['Azure_API_KEY'], max_retries=0,
+        )
+
+    @staticmethod
+    def _image(path):
+        encoded = OpenAIJudge._image(path)['image_url']['url'].split(',', 1)[1]
+        return {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/png', 'data': encoded}}
+
+    def _ask(self, prompt, paths=()):
+        content = [{'type': 'text', 'text': prompt}] + [self._image(p) for p in paths]
+        response = self.client.messages.create(
+            model=self.model_name, max_tokens=1024,
+            messages=[{'role': 'user', 'content': content}],
+        )
+        return '\n'.join(block.text for block in response.content if block.type == 'text')
