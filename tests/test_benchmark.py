@@ -63,7 +63,7 @@ class BenchmarkTests(unittest.TestCase):
             "domain": "D1",
             "subcategory": "1.1",
             "image_path": str(self.source),
-            "prompts": {"L1": "edit", "L3": ["one", "two", "three"]},
+            "prompts": {"L1": "edit", "L2b": "literal edit", "L3": ["one", "two", "three"]},
             "verification": {"expected_result": "red"},
         }
         self.result = self.root / "results" / "model" / "c1_L1_0.json"
@@ -93,7 +93,7 @@ class BenchmarkTests(unittest.TestCase):
         self.assertEqual(summary["successful"], 5)
         self.assertEqual(
             [call.args[3] for call in fidelity.call_args_list],
-            [control] + [self.case["verification"]["expected_result"]] * 4,
+            [control] + [self.case["prompts"]["L2b"]] * 4,
         )
 
     def test_success_compatible_schema_and_resume(self):
@@ -114,6 +114,8 @@ class BenchmarkTests(unittest.TestCase):
                 "level",
                 "repeat",
                 "output_path",
+                "estimated_cost_usd",
+                "generation_pricing",
                 "execution_status",
                 "text_response",
                 "execution_error",

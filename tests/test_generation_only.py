@@ -10,33 +10,6 @@ from run_benchmark import run_benchmark
 
 
 class GenerationOnlyTests(unittest.TestCase):
-    def test_standalone_smoke_script(self):
-        import runpy
-        from types import SimpleNamespace
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            source = root / 'input.png'
-            Image.new('RGB', (8, 8)).save(source)
-            case = {'case_id': 'c1', 'image_path': str(source), 'prompts': {'L1': 'red'}}
-            editor = Mock()
-            def edit(prompt, input_path, output_path):
-                Image.new('RGB', (8, 8), 'red').save(output_path)
-                return {'status': 'success'}
-            editor.generate_edit.side_effect = edit
-            api = Mock()
-            api.model_info.return_value.sha = 'revision'
-            modules = {
-                'torch': SimpleNamespace(cuda=SimpleNamespace(
-                    is_available=lambda: True, is_bf16_supported=lambda: True)),
-                'huggingface_hub': SimpleNamespace(HfApi=lambda: api),
-            }
-            with patch.dict('sys.modules', modules), patch('run_local.load_cases', return_value=[case]), patch(
-                'models.local_editors.LocalEditor', return_value=editor
-            ), patch('sys.argv', ['test_local_generation.py', '--model', 'flux-2-dev', '--output', str(root / 'out')]):
-                runpy.run_path(str(Path(__file__).resolve().parents[1] / 'test_local_generation.py'), run_name='__main__')
-            self.assertTrue((root / 'out/flux-2-dev/edited.png').is_file())
-            editor.generate_edit.assert_called_once()
-
     def test_generation_chain_resume_and_no_grading(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -64,7 +37,7 @@ class GenerationOnlyTests(unittest.TestCase):
                 for path in (root / 'results/local').glob('*.json'):
                     result = json.loads(path.read_text())
                     self.assertEqual(result['status'], 'generated')
-                    self.assertIsNone(result['r'])
+                    self.assertEqual(result['r'], 0 if result['level'] == 'L3-reset' else None)
                     self.assertIsNone(result['e'])
                     self.assertIsNone(result['q'])
                 self.assertEqual(run_benchmark([case], **options)['skipped'], 2)

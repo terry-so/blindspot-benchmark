@@ -3,7 +3,6 @@
 import argparse
 from importlib.metadata import version
 import json
-import os
 from pathlib import Path
 import subprocess
 import sys
@@ -11,7 +10,7 @@ import sys
 from models.local_editors import LocalEditor, MODEL_IDS, PUP_ID
 from run_benchmark import run_benchmark
 from utils.benchmark_runner import atomic_json, validate_inputs
-from utils.run_dataset import run_cases, fingerprint
+from utils.run_dataset import run_cases, fingerprint, execution_cases
 
 ROOT = Path(__file__).resolve().parent
 
@@ -50,24 +49,27 @@ def main(argv=None):
     parser.add_argument("--dataset", type=Path, default=ROOT / "data/benchmark_cases",
                         help="Reviewed case directory or dataset JSON")
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--judge", default=os.environ.get("JUDGE_MODEL"), help="Existing Azure judge deployment")
     parser.add_argument("--levels", nargs="+", default=["L1"], choices=["L0", "L1", "L2a", "L2b", "L3-reset"])
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--cases-per-subcategory", type=int, help="First N cases by ID per subcategory; omitted uses all")
+    parser.add_argument('--run-percent', type=int, default=100, help='Execute a percentage per subcategory while saving the full dataset')
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--cpu-offload", action="store_true")
-    parser.add_argument("--smoke-test", action="store_true", help="Run the first case, one repeat, with the same judge")
+    parser.add_argument("--smoke-test", action="store_true", help="Generate the first case, one repeat")
     parser.add_argument("--check", action="store_true", help="Check inputs, CUDA, imports and model access without loading weights")
-    parser.add_argument("--skip-judge", action="store_true", help="Save generations without judging or Azure access")
     parser.add_argument("--snapshot-root", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
-    if not args.skip_judge and (not args.judge or not all(os.environ.get(key) for key in ("AZURE_OPENAI_BASE_URL", "Azure_API_KEY"))):
-        parser.error("Set JUDGE_MODEL (or --judge), AZURE_OPENAI_BASE_URL and Azure_API_KEY")
+    if not 1 <= args.run_percent <= 100:
+        parser.error('run_percent must be from 1 to 100')
+    if args.run_percent != 100 and (args.smoke_test or args.cases_per_subcategory is not None):
+        parser.error('Use run_percent without smoke_test or cases_per_subcategory')
     snapshot_root = args.snapshot_root or args.output
     cases = run_cases(snapshot_root, args.dataset, args.cases_per_subcategory, args.smoke_test)
     if args.smoke_test:
         args.repeats = 1
     validate_inputs(cases, [args.model], args.levels, args.repeats, 1, 0)
+    selected = execution_cases(cases, args.run_percent)
+    print(f'{len(selected)}/{len(cases)} cases selected for this invocation; full dataset retained for continuation.')
 
     import torch
     from huggingface_hub import HfApi
@@ -91,46 +93,36 @@ def main(argv=None):
     for repo, revision in revisions.items():
         HfApi().auth_check(repo_id=repo, repo_type="model")
     settings = {
-        "model": args.model, "judge": None if args.skip_judge else args.judge,
-        "judge_endpoint": None if args.skip_judge else os.environ["AZURE_OPENAI_BASE_URL"],
+        "model": args.model, "judge": None,
+        "judge_endpoint": None,
         "dataset_sha256": fingerprint(cases),
         "case_ids": [case["case_id"] for case in cases], "levels": args.levels,
         "repeats": args.repeats, "seed": args.seed, "cpu_offload": args.cpu_offload,
         "revisions": revisions,
         "packages": {name: version(name) for name in ("torch", "diffusers", "transformers", "accelerate", "openai")},
     }
-    if args.skip_judge:
-        settings["generation_only"] = True
+    settings["generation_only"] = True
     if previous and previous != settings:
         raise ValueError("Run settings changed. Use a new --output directory.")
     if args.check:
-        print("Preflight passed. Run the smoke test to verify inference." if args.skip_judge else
-              "Preflight passed. Judge credentials are present; the smoke test verifies API access and inference.")
+        print("Preflight passed. Run the smoke test to verify inference.")
         return 0
     if not previous and args.output.exists() and any(p.name != "data" for p in args.output.iterdir()):
         raise ValueError("Output directory must be empty for a new run")
     cases = run_cases(snapshot_root, args.dataset, args.cases_per_subcategory, args.smoke_test, save=True)
+    selected = execution_cases(cases, args.run_percent)
     atomic_json(settings_path, settings)
     if not previous:
         (args.output / "environment.txt").write_text(
             subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True), encoding="utf-8"
         )
-    judge = None
-    if not args.skip_judge:
-        from models.wrappers import OpenAIJudge
-        judge = OpenAIJudge(args.judge)
-        # Validate the configured API before spending time loading GPU weights.
-        answer = judge.detect_refusal("Reply with exactly COMPLY.")
-        if "COMPLY" not in answer:
-            raise RuntimeError(f"Judge connectivity check returned an unexpected response: {answer!r}")
     editor = LocalEditor(
         args.model, revisions[MODEL_IDS[args.model]], revisions.get(PUP_ID),
         seed=args.seed, cpu_offload=args.cpu_offload,
     )
-    options = {"generation_only": True} if args.skip_judge else {}
     summary = run_benchmark(
-        cases, models={args.model: editor}, judge=judge, levels=args.levels,
-        repeats=args.repeats, result_dir=args.output / "results", max_workers=1, **options,
+        selected, models={args.model: editor}, levels=args.levels,
+        repeats=args.repeats, result_dir=args.output / "results", max_workers=1, generation_only=True,
     )
     print(json.dumps(summary, indent=2))
     return 1 if summary["failed"] or summary["unavailable"] else 0

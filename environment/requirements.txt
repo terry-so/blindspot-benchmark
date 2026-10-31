@@ -1,5 +1,6 @@
 # API benchmark, data preparation, analysis, and notebook kernel.
 openai>=1.60
+anthropic
 google-genai>=1.0
 pydantic>=2
 PyYAML

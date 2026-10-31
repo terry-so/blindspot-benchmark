@@ -1,4 +1,4 @@
-"""Run API and local editors: python run.py --config configs/benchmark.yaml."""
+"""Generate and judge API or local edits: python run.py --config configs/benchmark.yaml."""
 
 import argparse
 from functools import partial
@@ -13,13 +13,15 @@ import yaml
 from run_local import load_cases, main as run_local
 from run_benchmark import run_benchmark
 from utils.benchmark_runner import atomic_json, validate_inputs
-from utils.run_dataset import run_cases, fingerprint
+from utils.run_dataset import run_cases, fingerprint, execution_cases
 
 
 def parse_args(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path)
+    parser.add_argument('--mode', choices=['generate', 'judge', 'all'], default='generate')
+    parser.add_argument('--judged-output', type=Path, help='Scored copy; defaults to OUTPUT-scored')
     parser.add_argument('--provider', choices=['azure', 'openai', 'gemini', 'vertex', 'local'])
     parser.add_argument('--model')
     parser.add_argument('--models', nargs='+', help='Names to select from the YAML model list')
@@ -28,6 +30,7 @@ def parse_args(argv=None):
     parser.add_argument('--levels', nargs='+', default=['L1'], choices=['L0', 'L1', 'L2a', 'L2b', 'L3-reset'])
     parser.add_argument('--repeats', type=int, default=1)
     parser.add_argument('--cases-per-subcategory', type=int, help='First N cases by ID per subcategory; omitted uses all')
+    parser.add_argument('--run-percent', type=int, default=100, help='Execute this percentage per subcategory; keep the full snapshot for continuation')
     parser.add_argument('--max-workers', type=int, default=1)
     parser.add_argument('--judge-provider', choices=['azure', 'openai'], default='azure')
     parser.add_argument('--judge-model', default=os.environ.get('JUDGE_MODEL'))
@@ -71,9 +74,13 @@ def parse_args(argv=None):
     args = parser.parse_args(prefix + list(argv))
     if args.cases_per_subcategory is not None and args.cases_per_subcategory < 1:
         parser.error('cases_per_subcategory must be a positive integer')
-    if not args.judge_model:
-        parser.error('Set judge.model, --judge-model, or JUDGE_MODEL')
+    if not 1 <= args.run_percent <= 100:
+        parser.error('run_percent must be from 1 to 100')
+    if args.run_percent != 100 and (args.smoke_test or args.cases_per_subcategory is not None):
+        parser.error('Use run_percent without smoke_test or cases_per_subcategory')
     args.entries = entries
+    if args.mode == 'judge':
+        return args
     if entries is None:
         if not args.provider or not args.model or args.models:
             parser.error('Provide provider/model, or a YAML models list')
@@ -83,10 +90,14 @@ def parse_args(argv=None):
         names = set()
         from models.local_editors import MODEL_IDS
         for entry in entries:
-            if not isinstance(entry, dict) or set(entry) - {'name', 'provider', 'model', 'seed', 'cpu_offload'}:
-                parser.error('Each model accepts name, provider, model, seed, cpu_offload')
+            if not isinstance(entry, dict) or set(entry) - {'name', 'provider', 'model', 'seed', 'cpu_offload', 'pricing'}:
+                parser.error('Each model accepts name, provider, model, seed, cpu_offload, pricing')
             if not all(isinstance(entry.get(k), str) and entry[k].strip() for k in ('name', 'provider', 'model')):
                 parser.error('Each model requires name, provider, and model strings')
+            from utils.costs import validate_pricing
+            validate_pricing(entry.get('pricing'))
+            if entry['provider'] == 'local' and entry.get('pricing') is not None:
+                parser.error('Local GPU costs are not token-priced')
             name = entry['name']
             if name.casefold() in names or name in {'.', '..'} or any(c in name for c in '/\\:'):
                 parser.error('Model names must be unique safe folder names')
@@ -115,17 +126,42 @@ def require_env(*names):
 
 def main(argv=None):
     args = parse_args(argv)
+    if args.mode == 'generate':
+        return generate(args)
+    if not args.judge_model:
+        raise ValueError('Set judge.model or --judge-model')
+    destination = args.judged_output or args.output.with_name(args.output.name + '-scored')
+    source, target = args.output.resolve(), destination.resolve()
+    if target.exists() or target == source or source in target.parents:
+        raise ValueError('Choose a new --judged-output folder outside the generation run')
+    if args.mode == 'all':
+        require_env(*(('AZURE_OPENAI_BASE_URL', 'Azure_API_KEY') if args.judge_provider == 'azure' else ('OPENAI_API_KEY',)))
+        status = generate(args)
+        if status or args.check:
+            return status
+    from judge_results import main as judge_main
+    command = ['--run', str(args.output), '--output', str(destination),
+               '--judge-model', args.judge_model, '--judge-provider', args.judge_provider]
+    if args.models:
+        command.extend(['--models', *args.models])
+    if args.check:
+        command.append('--check')
+    return judge_main(command)
+
+
+def generate(args):
     if args.entries is not None:
         return run_many(args)
     if args.provider == 'local':
-        if args.max_workers != 1 or args.judge_provider != 'azure':
-            raise ValueError('Local runs require max_workers: 1 and an Azure judge')
+        if args.max_workers != 1:
+            raise ValueError('Local runs require max_workers: 1')
         local_args = ['--model', args.model, '--dataset', str(args.dataset),
-                      '--output', str(args.output), '--judge', args.judge_model,
+                      '--output', str(args.output),
                       '--repeats', str(args.repeats), '--seed', str(args.seed),
                       '--levels', *args.levels]
         if args.cases_per_subcategory is not None:
             local_args.extend(['--cases-per-subcategory', str(args.cases_per_subcategory)])
+        local_args.extend(['--run-percent', str(args.run_percent)])
         for flag in ['cpu_offload', 'smoke_test', 'check']:
             if getattr(args, flag):
                 local_args.append('--' + flag.replace('_', '-'))
@@ -144,15 +180,19 @@ def run_api(args, entries=None):
         'gemini': ('GEMINI_API_KEY',),
         'vertex': ('GOOGLE_CLOUD_PROJECT',),
     }
+    needs_judge = 'L3-reset' in args.levels
+    if needs_judge:
+        if not args.judge_model:
+            raise ValueError('Set judge.model for L3 refusal checks')
+        require_env(*required[args.judge_provider])
     for entry in entries:
-        require_env(*required[entry['provider']], *required[args.judge_provider])
+        require_env(*required[entry['provider']])
     cases = run_cases(args.output, args.dataset, args.cases_per_subcategory, args.smoke_test)
     if args.smoke_test:
         args.repeats = 1
     # Provider is a safe result-folder label even when model IDs contain slashes.
     validate_inputs(cases, [e['name'] for e in entries], args.levels, args.repeats, args.max_workers, 0)
     from models.wrappers import AzureImageEditor, OpenAIImageEditor, GeminiImageEditor
-    from models.judges import OpenAIJudge
     factories = {}
     for entry in entries:
         provider, model = entry['provider'], entry['model']
@@ -160,12 +200,16 @@ def run_api(args, entries=None):
                    'gemini': GeminiImageEditor, 'vertex': GeminiImageEditor}[provider]
         options = {'vertexai': provider == 'vertex'} if provider in {'gemini', 'vertex'} else {}
         factories[entry['name']] = partial(factory, model, **options)
-    judge_url = (os.environ['AZURE_OPENAI_BASE_URL'] if args.judge_provider == 'azure'
-                 else 'https://api.openai.com/v1')
-    judge_key = os.environ['Azure_API_KEY' if args.judge_provider == 'azure' else 'OPENAI_API_KEY']
-    make_judge = partial(OpenAIJudge, args.judge_model, base_url=judge_url, api_key=judge_key)
+    make_judge = None
+    judge_settings = None
+    if needs_judge:
+        judge_url = (os.environ['AZURE_OPENAI_BASE_URL'] if args.judge_provider == 'azure'
+                     else 'https://api.openai.com/v1')
+        from judge_results import create_judge
+        make_judge = partial(create_judge, args.judge_model, args.judge_provider)
+        judge_settings = {'provider': args.judge_provider, 'model': args.judge_model, 'endpoint': judge_url}
     settings = {
-        'judge': {'provider': args.judge_provider, 'model': args.judge_model, 'endpoint': judge_url},
+        'judge': judge_settings, 'generation_only': True,
         'levels': args.levels, 'repeats': args.repeats, 'max_workers': args.max_workers,
         'dataset_sha256': fingerprint(cases),
     }
@@ -186,15 +230,18 @@ def run_api(args, entries=None):
             raise ValueError('Output directory must be empty for a new run')
         pending.append((path, model_settings))
     if args.check:
-        print(f'Configuration and {len(cases)} cases validated. No API calls made; use --smoke-test to verify access.')
+        print(f'Configuration and {len(cases)} saved cases validated; {len(execution_cases(cases, args.run_percent))} selected for this invocation. No API calls made.')
         return 0
     cases = run_cases(args.output, args.dataset, args.cases_per_subcategory, args.smoke_test, save=True)
     for path, model_settings in pending:
         atomic_json(path, model_settings)
+    selected = execution_cases(cases, args.run_percent)
+    print(f'Generating {len(selected)}/{len(cases)} cases per model; completed edits are skipped. L3 refusal checks only.')
     summary = run_benchmark(
-        cases, model_factories=factories,
-        judge_factory=make_judge, levels=args.levels, repeats=args.repeats,
+        selected, model_factories=factories,
+        judge_factory=make_judge, generation_only=True, levels=args.levels, repeats=args.repeats,
         result_dir=args.output / 'results', max_workers=args.max_workers,
+        pricing={entry['name']: entry.get('pricing') for entry in entries},
     )
     print(json.dumps(summary, indent=2))
     return int(bool(summary['failed'] or summary['unavailable']))
@@ -203,8 +250,6 @@ def run_api(args, entries=None):
 def run_many(args):
     api = [e for e in args.entries if e['provider'] != 'local']
     local = [e for e in args.entries if e['provider'] == 'local']
-    if local and args.judge_provider != 'azure':
-        raise ValueError('Local models require an Azure judge')
     # Check every selected configuration before starting generation.
     from copy import copy
     check_args = copy(args)
@@ -217,10 +262,11 @@ def run_many(args):
                    '--model', entry['model'], '--dataset', str(args.dataset),
                    '--output', str(args.output / 'local' / entry['name']),
                    '--snapshot-root', str(args.output),
-                   '--judge', args.judge_model, '--repeats', str(args.repeats),
+                   '--repeats', str(args.repeats),
                    '--seed', str(entry.get('seed', args.seed)), '--levels', *args.levels]
         if args.cases_per_subcategory is not None:
             command.extend(['--cases-per-subcategory', str(args.cases_per_subcategory)])
+        command.extend(['--run-percent', str(args.run_percent)])
         if entry.get('cpu_offload', args.cpu_offload):
             command.append('--cpu-offload')
         if args.smoke_test:
@@ -234,6 +280,17 @@ def run_many(args):
     failed = run_api(args, api) if api else 0
     for command in commands:
         failed |= int(subprocess.run(command).returncode != 0)
+    # Local subprocesses save their own summaries; include them in the run total.
+    from utils.benchmark_runner import read_json
+    path = args.output / 'cost_summary.json'
+    costs = read_json(path)
+    for entry in local:
+        local_costs = read_json(args.output / 'local' / entry['name'] / 'cost_summary.json')
+        if entry['model'] in local_costs.get('models', {}):
+            costs.setdefault('scope', local_costs['scope'])
+            costs.setdefault('models', {})[entry['name']] = local_costs['models'][entry['model']]
+    if costs:
+        atomic_json(path, costs)
     return failed
 
 

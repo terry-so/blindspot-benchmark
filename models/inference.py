@@ -89,12 +89,6 @@ def generate_l3_chain(model, judge, case, output_path, threshold):
             if step_path.is_file():
                 step["output_path"] = str(step_path)
 
-            if judge is None:
-                if output.get("status") != "success" or output.get("image") is None or not step_path.is_file():
-                    raise RuntimeError(output.get("error") or "Step returned no saved image")
-                step["r"] = None
-                current_image = str(step_path)
-                continue
             refusal = detect_refusal(
                 judge,
                 current_image,

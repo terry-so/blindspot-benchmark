@@ -1,10 +1,30 @@
 """Save and reuse the selected source cases for a CLI run."""
 import hashlib
 import json
+import math
+import random
 from pathlib import Path
 from shutil import copyfile
 
 from utils.benchmark_runner import atomic_json, validate_inputs
+
+
+def execution_cases(cases, percent=100):
+    """Limit this invocation without changing the saved dataset or resume settings."""
+    if type(percent) is not int or not 1 <= percent <= 100:
+        raise ValueError('run_percent must be an integer from 1 to 100')
+    if percent == 100:
+        return cases
+    groups = {}
+    for case in cases:
+        groups.setdefault(case['subcategory'], []).append(case)
+    rng = random.Random(42)
+    selected = []
+    for _, group in sorted(groups.items()):
+        group = sorted(group, key=lambda c: c['case_id'])
+        rng.shuffle(group)
+        selected.extend(group[:math.ceil(len(group) * percent / 100)])
+    return selected
 
 
 def fingerprint(cases):

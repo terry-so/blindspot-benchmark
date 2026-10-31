@@ -12,6 +12,40 @@ import run
 
 
 class CLITests(unittest.TestCase):
+    def test_ten_percent_pilot_then_full_resume_without_scoring(self):
+        base = json.loads(self.dataset.read_text())[0]
+        cases = [base | {'case_id': f'{sub}_{i:02}', 'subcategory': sub,
+                         'prompts': {'L1': 'red', 'L2b': 'red', 'L3': ['one', 'two']}}
+                 for sub in ['1.1', '1.2'] for i in range(20)]
+        self.dataset.write_text(json.dumps(cases))
+        self.config.write_text('levels: [L1, L3-reset]\njudge: {provider: openai, model: judge}\nmodels:\n'
+                               '  - {name: sunburst, provider: openai, model: sunburst}\n'
+                               '  - {name: flare, provider: openai, model: flare}\n')
+        editor, judge = Mock(), Mock()
+        def edit(prompt, image, output):
+            result = Image.new('RGB', (8, 8), 'red')
+            result.save(output)
+            return {'status': 'success', 'image': result, 'text_response': 'Done'}
+        editor.generate_edit.side_effect = edit
+        judge.detect_refusal.return_value = 'COMPLY'
+        factory = Mock(return_value=editor)
+        modules = {'models.wrappers': SimpleNamespace(AzureImageEditor=factory, OpenAIImageEditor=factory, GeminiImageEditor=factory),
+                   'models.judges': SimpleNamespace(OpenAIJudge=Mock(return_value=judge))}
+        args = self.args + ['--models', 'sunburst', '--run-percent', '10']
+        with patch.dict('sys.modules', modules), patch.dict(os.environ, {'OPENAI_API_KEY': 'secret'}):
+            self.assertEqual(run.main(args), 0)
+            self.assertEqual(editor.generate_edit.call_count, 12)  # Four cases, one edit + two L3 steps.
+            snapshot = self.root / 'run/data/dataset.json'
+            self.assertEqual(len(json.loads(snapshot.read_text())), 40)
+            self.assertFalse((self.root / 'run/results/flare').exists())
+            self.assertEqual(run.main(args), 0)
+            self.assertEqual(editor.generate_edit.call_count, 12)
+            self.assertEqual(run.main(self.args + ['--models', 'sunburst']), 0)
+            self.assertEqual(editor.generate_edit.call_count, 120)  # Pilot edits were not repeated.
+        self.assertEqual(judge.detect_refusal.call_count, 80)
+        judge.judge_fidelity.assert_not_called()
+        judge.judge_realism.assert_not_called()
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -60,8 +94,9 @@ class CLITests(unittest.TestCase):
                         editor.assert_called_with('example', vertexai=provider == 'vertex')
                     else:
                         editor.assert_called_with('example')
-                    bench.call_args.kwargs['judge_factory']()
-                    judge.assert_called_with('judge', base_url='https://api.openai.com/v1', api_key='secret')
+                    self.assertIsNone(bench.call_args.kwargs['judge_factory'])
+                    self.assertTrue(bench.call_args.kwargs['generation_only'])
+                    judge.assert_not_called()
                     self.assertEqual(run.main(args), 0)
                     with self.assertRaisesRegex(ValueError, 'changed'):
                         run.main(args + ['--repeats', '3'])
