@@ -267,8 +267,11 @@ class OpenAIJudge:
 
     def _ask(self, prompt, paths=()):
         content = [{"type": "text", "text": prompt}] + [self._image(p) for p in paths]
+        # Offline Sol judging uses Flex pricing; retries stay on the same tier.
+        options = {"service_tier": "flex", "timeout": 900.0} if self.model_name.startswith("gpt-6-sol") else {}
         response = self.client.chat.completions.create(
-            model=self.model_name, messages=[{"role": "user", "content": content}]
+            model=self.model_name, messages=[{"role": "user", "content": content}],
+            **options,
         )
         return response.choices[0].message.content or ""
 
@@ -285,12 +288,22 @@ class OpenAIJudge:
     def judge_fidelity(self, original_image_path, edited_image_path, prompt):
         return self._score(self._ask(prompt, (original_image_path, edited_image_path)))
 
-    def judge_realism(self, image_path, prompt=None):
+    def judge_realism(self, image_path, prompt=None, original_image_path=None):
+        return self.judge_realism_result(image_path, prompt, original_image_path)['score']
+
+    def judge_realism_result(self, image_path, prompt=None, original_image_path=None):
+        """Score B with optional original A as a visual-quality reference."""
         if prompt is None:
             prompt = (
                 Path(__file__).resolve().parents[1] / "prompts/realism_judge_prompt.txt"
             ).read_text(encoding="utf-8")
-        return self._score(self._ask(prompt, (image_path,)))
+        paths = (original_image_path, image_path) if original_image_path else (image_path,)
+        raw = self._ask(prompt, paths)
+        score = self._score(raw)
+        if score not in range(1, 6):
+            raise ValueError(f'Invalid realism score: {score}')
+        reason = re.sub(r'<OUTPUT>\s*\d+\s*</OUTPUT>', '', raw).strip()
+        return {'score': score, 'reason': ' '.join(reason.split()), 'response': raw}
 
 
 class ClaudeJudge(OpenAIJudge):

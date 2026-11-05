@@ -16,6 +16,7 @@ EVALUATION RULES:
 - Explicitly requested words, names, numbers, and dates must be correct and sufficiently readable to verify.
 - All essential parts of the requested change must be achieved.
 - Accept approximate styling, placement, size, color, or alignment when the intended result remains clear, unless an exact property is essential to the request.
+- For a replacement, the new value must take the place of the original at the same location and a similar size, unless the request specifies otherwise. Adding the new value elsewhere while leaving the original in place fails.
 - Do not impose requirements that are not stated.
 
 2. Tolerable differences
@@ -41,7 +42,4 @@ Return 0 when the main change is absent, incorrect, applied to the wrong subject
 A score of 0 must be supported by a clear failure of an essential requirement. Mere differences between the images are not sufficient.
 
 OUTPUT:
-Output only one of the following. Do not include reasoning or explanation. Output one of the following labels only:
-
-<OUTPUT>1</OUTPUT>
-<OUTPUT>0</OUTPUT>
+Give one short sentence citing the visible evidence for your decision. On the next line, give exactly one score: <OUTPUT>1</OUTPUT> or <OUTPUT>0</OUTPUT>.

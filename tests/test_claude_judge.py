@@ -24,11 +24,28 @@ class ClaudeJudgeTests(unittest.TestCase):
         ns = dict(os=os, urlsplit=urlsplit, re=re, Image=Image, BytesIO=BytesIO, base64=base64,
                   Path=Path, __file__=str(Path(__file__).resolve().parents[1] / 'models/judges.py'))
         exec(compile(ast.Module(body=nodes, type_ignores=[]), 'judges', 'exec'), ns)
+        self.openai_cls = ns['OpenAIJudge']
         self.cls = ns['ClaudeJudge']
         self.sdk = Mock()
         self.sdk.return_value.messages.create.return_value = SimpleNamespace(content=[
             SimpleNamespace(type='thinking', thinking='not a score'),
             SimpleNamespace(type='text', text='<OUTPUT>1</OUTPUT>')])
+
+    def test_sol_uses_flex_and_other_judges_keep_default(self):
+        for model in ('gpt-6-sol-2026-09-22-3216sdad', 'gpt-test'):
+            judge = object.__new__(self.openai_cls)
+            judge.model_name = model
+            judge.client = Mock()
+            judge.client.chat.completions.create.return_value = SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content='<OUTPUT>1</OUTPUT>'))])
+            self.assertEqual(judge.detect_refusal('test'), '<OUTPUT>1</OUTPUT>')
+            options = judge.client.chat.completions.create.call_args.kwargs
+            if model.startswith('gpt-6-sol'):
+                self.assertEqual(options['service_tier'], 'flex')
+                self.assertEqual(options['timeout'], 900.0)
+            else:
+                self.assertNotIn('service_tier', options)
+                self.assertNotIn('timeout', options)
 
     def test_foundry_route_key_image_order_and_score(self):
         with patch.dict('sys.modules', {'anthropic': SimpleNamespace(AnthropicFoundry=self.sdk)}), patch.dict(os.environ, {}, clear=True):

@@ -36,7 +36,17 @@ class SeparateJudgingTests(unittest.TestCase):
             self.assertEqual(judge.detect_refusal.call_count, 2)
             judge.judge_fidelity.assert_not_called()
             judge.judge_realism.assert_not_called()
-            self.assertEqual(judge_results(source, root / 'scored', judge), 0)
+            refusal, realism = Mock(), Mock()
+            refusal.detect_refusal.return_value = 'COMPLY'
+            realism.judge_realism.return_value = 4
+            self.assertEqual(judge_results(source, root / 'scored', judge,
+                             refusal_judge=refusal, realism_judge=realism, max_workers=4, metadata={'test': True}), 0)
+            self.assertEqual(judge_results(source, root / 'scored', judge,
+                             resume=True, metadata={'test': True}), 0)
+            self.assertEqual(refusal.detect_refusal.call_count, 1)
+            self.assertEqual(judge.detect_refusal.call_count, 2)  # Only generation's L3 calls.
+            self.assertEqual(realism.judge_realism.call_count, 2)
+            judge.judge_realism.assert_not_called()
             self.assertEqual(judge.judge_fidelity.call_count, 2)
             self.assertEqual(model.generate_edit.call_count, 3)
 

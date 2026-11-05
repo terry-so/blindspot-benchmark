@@ -32,14 +32,19 @@ def execute_edit(
     gen_edit = retry_with_exponential_backoff(model.generate_edit)
 
     try:
-        return gen_edit(prompt, input_image_path, output_image_path)
+        output = gen_edit(prompt, input_image_path, output_image_path)
     except Exception as e:
-        return {
+        output = {
             "status": "failed",
             "text_response": None,
             "image": None,
             "error": f"{error_kind(e)}: {e}",
         }
+
+    context = getattr(model, 'generation_context', None)
+    if isinstance(context, dict):
+        output['generation_context'] = dict(context)
+    return output
 
 
 def generate_single_edit(model, case, level, output_path):
