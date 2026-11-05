@@ -127,6 +127,7 @@ def load_generation(saved, image_path):
             "finish_reason",
             "safety_block",
             "usage",
+            "generation_context",
         )
     }
     for key in ("chain_length", "steps", "first_refusal_step", "failed_step"):
@@ -157,6 +158,8 @@ def response_metadata(output):
     }
     if output.get("technical_error"):
         metadata["technical_error"] = True
+    if isinstance(output.get("generation_context"), dict):
+        metadata["generation_context"] = dict(output["generation_context"])
     if output.get("usage") is not None:
         metadata["usage"] = output["usage"]
     return metadata

@@ -47,7 +47,7 @@ class Judge:
             raise ValueError("bad grade")
         return 1
 
-    def judge_realism(self, *args):
+    def judge_realism(self, *args, **kwargs):
         return 4
 
 
@@ -74,6 +74,18 @@ class BenchmarkTests(unittest.TestCase):
         self.distance.start()
         self.addCleanup(self.distance.stop)
 
+    def test_generation_failure_and_legacy_failure_resume(self):
+        self.assertEqual(self.run_batch(model=Model(fail=True), generation_only=True)['failed'], 1)
+        saved = read_json(self.result)
+        self.assertEqual(saved['status'], 'error')
+        saved.update(status='generated', image_returned=False)
+        atomic_json(self.result, saved)
+        model = Model()
+        self.assertEqual(self.run_batch(model=model, generation_only=True)['successful'], 1)
+        self.assertEqual(len(model.calls), 1)
+        self.assertEqual(self.run_batch(model=model, generation_only=True)['skipped'], 1)
+        self.assertEqual(len(model.calls), 1)
+
     def run_batch(self, model=None, judge=None, **kwargs):
         return run_benchmark(
             kwargs.pop("cases", [self.case]),
@@ -87,13 +99,13 @@ class BenchmarkTests(unittest.TestCase):
 
     def test_l0_fidelity_uses_control_prompt_only(self):
         control = "Increase brightness while preserving all text."
-        self.case["prompts"].update(L0=control, L2a="pretext", L2b="literal")
+        self.case["prompts"].update(L0=control, L2a="pretext", L2b="literal. Preserve all content outside the specified edit targets.")
         with patch("evaluators.auto_grader.check_fidelity", return_value=1) as fidelity:
             summary = self.run_batch(levels=["L0", "L1", "L2a", "L2b", "L3-reset"])
         self.assertEqual(summary["successful"], 5)
         self.assertEqual(
             [call.args[3] for call in fidelity.call_args_list],
-            [control] + [self.case["prompts"]["L2b"]] * 4,
+            [control] + ["literal."] * 4,
         )
 
     def test_success_compatible_schema_and_resume(self):

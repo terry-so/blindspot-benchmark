@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 from pathlib import Path
 
-from evaluators.auto_grader import check_fidelity, check_realism, detect_refusal
+from evaluators.auto_grader import check_fidelity, check_realism, detect_refusal, fidelity_target
 from utils.benchmark_runner import atomic_json, valid_image
 
 
@@ -64,9 +64,7 @@ def select_cases(source, labels=None, disagreements_only=False, metric="fidelity
         result = json.loads(path.read_text(encoding='utf-8'))
         original, edited = case_path.with_name('input.png'), path.with_suffix('.png')
         if metric == 'fidelity':
-            target = case['prompts'].get('L0' if entry['level'] == 'L0' else 'L2b')
-            if not isinstance(target, str) or not target.strip():
-                raise ValueError(f"Missing fidelity target: {entry['case_id']}")
+            target = fidelity_target(case, entry['level'])
             if not valid_image(original):
                 raise ValueError(f'Missing or unreadable image: {original}')
             entry.update(original_image=str(original), target=target)
@@ -74,6 +72,11 @@ def select_cases(source, labels=None, disagreements_only=False, metric="fidelity
             if not valid_image(edited):
                 raise ValueError(f'Missing or unreadable image: {edited}')
             entry['edited_image'] = str(edited)
+            if metric == 'realism':
+                entry['edit_context'] = fidelity_target(case, entry['level'])
+                if not valid_image(original):
+                    raise ValueError(f'Missing or unreadable image: {original}')
+                entry['original_image'] = str(original)
         else:
             responses = []
             if entry['level'] == 'L3-reset':
@@ -194,12 +197,17 @@ def regrade(selected, destination, judge, selection, judge_info=None, *, max_wor
 
     def grade(entry):
         record = dict(entry, new_score=None, error=None)
+        if metric == 'realism':
+            record.update(realism_reason=None, realism_response=None)
         try:
             if metric == 'fidelity':
                 score = check_fidelity(judge, entry['original_image'], entry['edited_image'],
                                        entry['target'], prompt_template=templates['fidelity_judge_prompt.txt'])
             elif metric == 'realism':
-                score = check_realism(judge, entry['edited_image'], prompt_template=templates['realism_judge_prompt.txt'])
+                details = {}
+                score = check_realism(judge, entry['edited_image'], prompt_template=templates['realism_judge_prompt.txt'], details=details, edit_context=entry.get('edit_context'), original_image_path=entry.get('original_image'))
+                if details:
+                    record.update(realism_reason=details['reason'], realism_response=details['response'])
             else:
                 score = int(any(detect_refusal(judge, '', response, 0, response['instruction'],
                                               prompt_templates=templates) for response in entry['responses']))

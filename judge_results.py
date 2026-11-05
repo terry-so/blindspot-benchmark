@@ -1,4 +1,5 @@
 """Judge saved edits in a new output folder; never run image generation."""
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
 import json
 import os
@@ -40,16 +41,26 @@ def result_paths(source, models=None):
     return paths
 
 
-def judge_results(source, destination, judge, models=None):
+def judge_results(source, destination, judge, models=None, *, refusal_judge=None, realism_judge=None, max_workers=1, prompt_templates=None, metadata=None, resume=False, skip_refusal=False):
     source, destination = Path(source).resolve(), Path(destination).resolve()
-    if source == destination or source in destination.parents or destination.exists():
+    if source == destination or source in destination.parents or (destination.exists() and not resume):
         raise ValueError("Choose a new output folder outside the source run")
     paths = result_paths(source, models)
-    shutil.copytree(source, destination)
-    failed = 0
-    for index, original in enumerate(paths, 1):
+    if resume:
+        saved_metadata = json.loads((destination / "judging.json").read_text(encoding="utf-8"))
+        if any(saved_metadata.get(k) != v for k, v in metadata.items()):
+            raise ValueError("Judge settings or prompts changed; use a new output folder")
+    else:
+        shutil.copytree(source, destination)
+    if metadata is not None:
+        atomic_json(destination / "judging.json", metadata)
+
+    def process(original):
         path = destination / original.relative_to(source)
         result = json.loads(path.read_text(encoding='utf-8'))
+        if resume and result.get('status') == 'ok':
+            return False
+        result = json.loads(original.read_text(encoding='utf-8'))
         level = result['level']
         image_path = path.with_suffix('.png')
         result['output_path'] = str(image_path)
@@ -57,7 +68,7 @@ def judge_results(source, destination, judge, models=None):
             if result.get('technical_error') or (result.get('status') == 'error' and not valid_image(image_path)):
                 raise RuntimeError(result.get('error') or 'Generation failed')
             # Preserve decisions that determined whether an L3 chain continued.
-            refusal = result.get('r') if level == 'L3-reset' else None
+            refusal = 0 if skip_refusal else (result.get('r') if level == 'L3-reset' else None)
             if level == 'L3-reset' and refusal != 1:
                 steps = result.get('steps', [])
                 if result.get('failed_step') or len(steps) != result.get('chain_length') or not steps:
@@ -87,15 +98,22 @@ def judge_results(source, destination, judge, models=None):
                       'safety_block': result.get('safety_block', False)}
             prompt = '\n'.join(case['prompts']['L3']) if level == 'L3-reset' else case['prompts'][level]
             labels = grade_output(judge, case, prompt, output, str(image_path), 0,
-                                  refusal_score=refusal, level=level)
+                                  refusal_score=refusal, level=level, refusal_judge=refusal_judge,
+                                  realism_judge=realism_judge, prompt_templates=prompt_templates)
             result.update(labels)
             result.pop('error', None)
         except Exception as error:
             result.update(status='error', r=result.get('r') if level == 'L3-reset' else None,
                           e=None, q=None, error=str(error))
-            failed += 1
         atomic_json(path, result)
-        print(f'{index}/{len(paths)} judged', flush=True)
+        return result["status"] == "error"
+
+    failed = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = [pool.submit(process, path) for path in paths]
+        for index, future in enumerate(as_completed(futures), 1):
+            failed += future.result()
+            print(f"{index}/{len(paths)} judged", flush=True)
     return failed
 
 
@@ -104,6 +122,8 @@ def main(argv=None):
     parser.add_argument('--run', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--judge-model', default=os.environ.get('JUDGE_MODEL'))
+    for metric in ('refusal', 'fidelity', 'realism'):
+        parser.add_argument(f'--{metric}-judge-model', help='Override --judge-model for this metric')
     parser.add_argument('--judge-provider', choices=['azure', 'openai'], default='azure')
     parser.add_argument('--models', nargs='+', help='Saved model folder names to judge')
     parser.add_argument('--metrics', nargs='+', choices=['refusal', 'fidelity', 'realism'], help='Regrade selected metrics independently into reports')
@@ -111,18 +131,19 @@ def main(argv=None):
     parser.add_argument('--disagreements-only', action='store_true', help='Select only old disagreements with --labels')
     parser.add_argument('--check', action='store_true', help='Validate saved results or metric selection without API calls')
     parser.add_argument('--max-workers', type=int, default=1, help='Concurrent regrading requests (default: 1)')
+    parser.add_argument('--skip-refusal', action='store_true', help='Score local outputs for fidelity and realism only')
     parser.add_argument('--resume', action='store_true', help='Reuse successful scores; retry failed and unfinished cases')
     args = parser.parse_args(argv)
     if args.max_workers < 1:
         parser.error('--max-workers must be a positive integer')
-    if args.max_workers != 1 and not args.metrics:
-        parser.error('--max-workers requires --metrics')
-    if (args.labels or args.disagreements_only or args.resume) and not args.metrics:
-        parser.error('--labels, --disagreements-only and --resume require --metrics')
+    if args.metrics and any(getattr(args, f'{m}_judge_model') for m in ('refusal', 'fidelity', 'realism')):
+        parser.error('For metric calibration, use --judge-model for the selected metrics')
+    if (args.labels or args.disagreements_only) and not args.metrics:
+        parser.error('--labels and --disagreements-only require --metrics')
     if args.models and args.metrics:
         parser.error('--models is for full judging; use --labels to select regrades')
     if not args.metrics:
-        if args.output.exists() or args.output.resolve() == args.run.resolve() or args.run.resolve() in args.output.resolve().parents:
+        if (args.output.exists() and not args.resume) or args.output.resolve() == args.run.resolve() or args.run.resolve() in args.output.resolve().parents:
             parser.error('Choose a new output folder outside the source run')
         paths = result_paths(args.run, args.models)
         if args.check:
@@ -143,11 +164,11 @@ def main(argv=None):
             selections[metric] = (selected, selection)
             if args.resume and (args.output / metric).exists():
                 records = load_regrade_progress(args.output / metric, selected, selection,
-                          {'model': args.judge_model, 'provider': args.judge_provider}, prompt_templates(metric))
+                          {'model': args.judge_model, 'provider': args.judge_provider}, prompt_templates(selection['metric']))
                 print(f"{metric}: {sum(r is not None for r in records)} successful scores can be reused.")
         calibration = {'metrics': args.metrics, 'judge': {'model': args.judge_model, 'provider': args.judge_provider},
                        'selections': {m: selection for m, (_, selection) in selections.items()},
-                       'prompts': {m: prompt_templates(m) for m in args.metrics}}
+                       'prompts': {m: prompt_templates(selections[m][1].get('metric', m)) for m in args.metrics}}
         if args.resume:
             saved = json.loads((args.output / 'calibration.json').read_text(encoding='utf-8'))
             if saved != calibration:
@@ -169,10 +190,23 @@ def main(argv=None):
             print(f'Reports: {args.output / metric}')
             failed += report['failed']
         return int(bool(failed))
-    failed = judge_results(args.run, args.output, judge, models=args.models)
-    atomic_json(args.output / 'judging.json', {'model': args.judge_model, 'provider': args.judge_provider,
-                'source': str(args.run.resolve()), 'failed': failed,
-                'prompts': {p.name: p.read_text(encoding='utf-8') for p in Path(__file__).with_name('prompts').glob('*judge_prompt.txt')}})
+    models = {m: getattr(args, f'{m}_judge_model') or args.judge_model
+              for m in ('refusal', 'fidelity', 'realism')}
+    clients = {args.judge_model: judge}
+    for model in set(models.values()):
+        if model not in clients:
+            clients[model] = create_judge(model, args.judge_provider)
+    prompts = {p.name: p.read_text(encoding='utf-8') for p in Path(__file__).with_name('prompts').glob('*judge_prompt.txt')}
+    metadata = {'models': models, 'provider': args.judge_provider,
+                'source': str(args.run.resolve()), 'realism_scale': '1-5',
+                'l3_refusal': 'Preserved from generation', 'prompts': prompts}
+    if args.skip_refusal:
+        metadata['skip_refusal'] = True
+    failed = judge_results(args.run, args.output, clients[models['fidelity']], models=args.models,
+                           refusal_judge=clients[models['refusal']], realism_judge=clients[models['realism']],
+                           max_workers=args.max_workers, prompt_templates=prompts, metadata=metadata,
+                           resume=args.resume, skip_refusal=args.skip_refusal)
+    atomic_json(args.output / 'judging.json', dict(metadata, failed=failed))
     return int(bool(failed))
 
 

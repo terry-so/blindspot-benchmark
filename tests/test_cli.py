@@ -100,6 +100,19 @@ class CLITests(unittest.TestCase):
                     self.assertEqual(run.main(args), 0)
                     with self.assertRaisesRegex(ValueError, 'changed'):
                         run.main(args + ['--repeats', '3'])
+                    if provider == 'vertex':
+                        settings_path = self.root / provider / 'settings.json'
+                        before = settings_path.read_bytes()
+                        with patch.dict(os.environ, {'GOOGLE_CLOUD_PROJECT': 'second-project'}):
+                            self.assertEqual(run.main(args + ['--check']), 0)
+                            self.assertEqual(settings_path.read_bytes(), before)
+                            self.assertEqual(run.main(args), 0)
+                            updated = json.loads(settings_path.read_text())
+                            self.assertEqual(updated['project'], 'second-project')
+                            self.assertEqual(updated['project_history'], ['project', 'second-project'])
+                            with patch.dict(os.environ, {'GOOGLE_CLOUD_LOCATION': 'different-region'}):
+                                with self.assertRaisesRegex(ValueError, 'changed'):
+                                    run.main(args)
                     settings = (self.root / provider / 'settings.json').read_text()
                     self.assertNotIn('secret', settings)
                     data = json.loads(self.dataset.read_text())

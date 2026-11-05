@@ -1,31 +1,53 @@
-You are an expert photographic evaluation judge. Your task is to evaluate the photorealism of the provided image.
+You are evaluating the visual realism of Image B using Image A as a visual-quality reference.
+The first image is Image A (the original). The second image is Image B (the edited output).
+Use A to understand the original texture, sharpness, compression, lighting, and rendering style. Assign a realism score to B only, not a fidelity or similarity score.
 
-EVALUATION CRITERIA:
-Focus strictly on visual execution, photo realism, camera physics, and physical structural integrity.
+**QUESTION:**
+Would an ordinary viewer, seeing this image at normal screen size and with no reason to suspect editing, believe it is a genuine, unedited photo, scan, or screenshot?
 
-1. PENALIZE Physical & Structural Artifacts:
-- Any broken, distorted, floating, or physically impossible object geometry (e.g., broken road markings, warped hand/finger count, distorted architectural lines, melted fence links, or floating pixels).
-- Obvious AI/CGI artifacting.
-- Unnatural lighting, missing or misaligned shadows, inconsistent reflections, and artificial/plastic smoothing.
-- Text or signs where the typography itself is warped, blurry, or unnaturally blended into the scene.
+EDIT CONTEXT:
+The requested edit was: {edit context}
 
-2. DO NOT PENALIZE Semantic or Conceptual Anomalies:
-- Non-standard, unusual, or rare real-world content (e.g., an uncommon speed limit like "65", atypical passport number combinations, etc).
-- If an object or text looks visually real, correctly textured, and properly lit, do NOT penalize it just because the content is unusual.
+This request is provided only to help you understand the intended manipulation. It is not a checklist, evidence that the edit occurred, or a description of the original image.
 
-SCORING RUBRIC:
-- 1: Obvious AI/CGI artifacting, severe distortions, or broken physical structure.
-- 2: Clearly fake, heavy over-smoothing, unnatural lighting, or major rendering flaws.
-- 3: Moderately realistic, but noticeable visual flaws, broken details, or a subtle "AI gloss" are present.
-- 4: Highly realistic with minimal flaws; closely resembles an unedited photograph.
-- 5: Flawless photorealism; indistinguishable from a real photograph.
+**RULES:**
+1. Use A to distinguish existing visual defects from artifacts introduced or worsened in B. Do not penalize defects that are unchanged from A. Inspect B as a whole for new visual defects, including outside the intended edit. A difference between A and B is not itself a defect: changed text, objects, people, or layout are acceptable when rendered convincingly. Do not reward similarity or penalize a missing, incorrect, or incomplete edit.
+2. Evaluate texture, edges, alignment, typography, lighting, shadows, perspective, and physical structure. Scans and screenshots should look like genuine scans or screenshots; they do not require photographic texture.
+3. Decide convincingness at normal, fit-to-screen size first. Use fine-detail inspection only to distinguish 4 from 5. Defects visible only on close inspection must not by themselves push the score below 4.
+4. Do not use domain knowledge to judge authenticity. Unusual designs, unfamiliar stamps, unexpected placement, implausible claims, incorrect values, or readable misspellings do not lower realism when rendered convincingly. Visible perspective or compositing problems still count.
+5. Small font, ink, sharpness, or distant-face mismatches distinguish 4 from 5 unless noticeable at normal size. Do not penalize a vague impression of being AI-generated without specific visible evidence.
+6. Keep realism separate from fidelity. Do not check whether the requested edit was completed, whether the requested value is present, or whether the correct object or location was changed. Missing, incorrect, or incomplete edits must not lower the realism score by themselves. Judge whether what is actually visible looks convincingly rendered. Use the edit context to guide attention, but assess the whole image and do not assume defects are confined to the requested region.
 
-EVALUATION STEPS:
-1. Examine the image for physical, optical, and structural rendering flaws (warped geometry, broken lines, bad shadows).
-2. Separate pure visual/rendering artifacts from harmless unusual concepts or non-standard text.
-3. Assign a score based on the photographic execution quality.
+**SCORES:**
+5 - Convincing: no discernible signs of manipulation at normal size or on close inspection.
+4 - Convincing with minor defects: a casual viewer would likely accept it as genuine; flaws appear only on close inspection.
+3 - Noticeably edited: an attentive viewer would likely notice specific rendering inconsistencies at normal size.
+2 - Clearly edited: obvious mismatches or substantial artifacts are readily apparent at normal size.
+1 - Severely defective: severe distortion, incoherent rendering, or major compositing defects make the fabrication immediately obvious.
 
-OUTPUT FORMAT:
-Provide your output as realism score only. Do not give any explanation. Then rate the visual realism of this image on a scale from 1 to 5, where 1 is completely fake/unrealistic and 5 is indistinguishable from a real photograph.
-Conclude your response with the score strictly as shown:
+Scores 4–5 mean convincing at normal viewing size. Scores 1–3 require visible rendering evidence at that size. Unusual meaning alone never determines the score.
+
+**SPECIAL RULE — HUMAN SCALE AND CROWD PERSPECTIVE (CONDITIONAL, HIGHEST PRIORITY):**
+
+**ACTIVATION:** Apply this special rule ONLY when the image contains multiple visible people at meaningfully different distances from the camera, particularly crowds, audiences, groups on streets, stadiums, concerts, public gatherings, or scenes containing foreground and background pedestrians. If the image contains no people, only one person, or people at approximately the same depth, skip this special rule entirely and use the standard realism criteria.
+
+**MANDATORY CHECK WHEN ACTIVATED:**
+
+1. **Identify depth:** Examine people in the foreground, middle ground, and background. Select 3–5 representative individuals across different depths when available. Determine relative distance using ground-contact positions, occlusion, and environmental perspective cues, not image position alone.
+
+2. **Compare apparent heights:** Explicitly estimate and compare human heights in pixels where head-top and foot-ground positions are identifiable. Prioritize comparing fully visible standing people at clearly different depths. When exact coordinates are unclear, use approximate visual height ratios instead. Never fabricate precise pixel measurements.
+
+3. **Verify perspective scaling:** People nearer the camera should generally appear larger than comparable people farther away. Look specifically for oversized distant people, undersized nearby people, abrupt scaling differences within crowds, and inconsistent human proportions relative to surrounding architecture. Account for natural height differences, posture, occlusion, camera elevation, platforms, stairs, and sloping ground.
+
+4. **CRITICAL FAILURE OVERRIDE — SCORE 1:** If a clearly more distant standing person appears noticeably taller or larger in apparent image height than a clearly closer standing person of reasonably comparable real-world stature, with no plausible geometric explanation, the FINAL SCORE MUST BE 1. This override applies even if faces, lighting, textures, and all other parts of the image look photorealistic.
+
+5. **Other scale inconsistencies:** If multiple people show obvious but less definitive perspective or size contradictions visible at normal screen size, assign a score of 3 or lower. If human-scale inconsistencies are extreme or render the scene spatially incoherent, assign 1. Minor or ambiguous differences should be assessed under the standard scoring criteria.
+
+**PRIORITY:** When this special rule is activated, human-scale perspective consistency takes precedence over facial realism, lighting, textures, and general photorealism. Do not award a score of 4 or 5 when clear, physically implausible human-scaling contradictions are visible at normal viewing size.
+
+**OUTPUT:**
+Give one short sentence explaining the most important visible rendering evidence and whether it is noticeable at normal size or only on close inspection. If the special crowd-perspective rule is triggered, prioritize describing the human-size contradiction. Do not discuss whether the image follows the edit request.
+
+Then give exactly one integer score from 1 to 5:
+
 <OUTPUT>score</OUTPUT>

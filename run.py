@@ -20,6 +20,8 @@ def parse_args(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path)
+    parser.add_argument('--resume', action='store_true', help='Resume saved-result judging')
+    parser.add_argument('--skip-refusal', action='store_true', help='Judge local outputs for fidelity and realism only')
     parser.add_argument('--mode', choices=['generate', 'judge', 'all'], default='generate')
     parser.add_argument('--judged-output', type=Path, help='Scored copy; defaults to OUTPUT-scored')
     parser.add_argument('--provider', choices=['azure', 'openai', 'gemini', 'vertex', 'local'])
@@ -33,6 +35,8 @@ def parse_args(argv=None):
     parser.add_argument('--run-percent', type=int, default=100, help='Execute this percentage per subcategory; keep the full snapshot for continuation')
     parser.add_argument('--max-workers', type=int, default=1)
     parser.add_argument('--judge-provider', choices=['azure', 'openai'], default='azure')
+    for metric in ('refusal', 'fidelity', 'realism'):
+        parser.add_argument(f'--{metric}-judge-model', help='Saved-result judge override for this metric')
     parser.add_argument('--judge-model', default=os.environ.get('JUDGE_MODEL'))
     parser.add_argument('--seed', type=int, default=42, help='Local models only')
     parser.add_argument('--cpu-offload', action=argparse.BooleanOptionalAction, default=False)
@@ -132,7 +136,7 @@ def main(argv=None):
         raise ValueError('Set judge.model or --judge-model')
     destination = args.judged_output or args.output.with_name(args.output.name + '-scored')
     source, target = args.output.resolve(), destination.resolve()
-    if target.exists() or target == source or source in target.parents:
+    if (target.exists() and not args.resume) or target == source or source in target.parents:
         raise ValueError('Choose a new --judged-output folder outside the generation run')
     if args.mode == 'all':
         require_env(*(('AZURE_OPENAI_BASE_URL', 'Azure_API_KEY') if args.judge_provider == 'azure' else ('OPENAI_API_KEY',)))
@@ -142,6 +146,15 @@ def main(argv=None):
     from judge_results import main as judge_main
     command = ['--run', str(args.output), '--output', str(destination),
                '--judge-model', args.judge_model, '--judge-provider', args.judge_provider]
+    command.extend(['--max-workers', str(args.max_workers)])
+    for metric in ('refusal', 'fidelity', 'realism'):
+        model = getattr(args, f'{metric}_judge_model')
+        if model:
+            command.extend([f'--{metric}-judge-model', model])
+    if args.resume:
+        command.append('--resume')
+    if args.skip_refusal:
+        command.append('--skip-refusal')
     if args.models:
         command.extend(['--models', *args.models])
     if args.check:
@@ -224,8 +237,17 @@ def run_api(args, entries=None):
         folder = args.output / 'models' / entry['name'] if multiple else args.output
         path = folder / 'settings.json'
         if path.exists():
-            if json.loads(path.read_text(encoding='utf-8')) != model_settings:
+            previous = json.loads(path.read_text(encoding='utf-8'))
+            # Concurrency can change on resume without changing the experiment.
+            ignored = {'max_workers'}
+            if entry['provider'] == 'vertex':
+                ignored.update({'project', 'project_history'})
+            if ({k: v for k, v in previous.items() if k not in ignored}
+                    != {k: v for k, v in model_settings.items() if k not in ignored}):
                 raise ValueError('Run settings or dataset changed. Use a new --output directory.')
+            if entry['provider'] == 'vertex':
+                history = previous.get('project_history', [previous['project']])
+                model_settings['project_history'] = list(dict.fromkeys([*history, model_settings['project']]))
         elif (folder.exists() and any(p.name != 'data' for p in folder.iterdir())) or (multiple and (args.output / 'results' / entry['name']).exists()):
             raise ValueError('Output directory must be empty for a new run')
         pending.append((path, model_settings))

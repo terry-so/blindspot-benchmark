@@ -42,7 +42,7 @@ def run_experiment(
         return "skipped"
     if generation_only and saved.get("status") == "generated":
         from utils.benchmark_runner import valid_image
-        if saved.get("image_returned") is False or valid_image(output_path):
+        if (saved.get("execution_status") == "success" or saved.get("safety_block")) and (saved.get("image_returned") is False or valid_image(output_path)):
             return "skipped"
 
     recover = can_regrade(saved, output_path, level)
@@ -98,7 +98,7 @@ def run_experiment(
                 else case["prompts"][level]
             )
             if generation_only:
-                if output.get("technical_error"):
+                if output.get("technical_error") or (output.get("status") == "failed" and not output.get("safety_block")):
                     raise RuntimeError(output.get("error") or "Generation failed")
                 labels = {"status": "generated", "r": refusal_score, "e": None, "q": None,
                           "image_returned": output.get("image") is not None}

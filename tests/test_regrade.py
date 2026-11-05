@@ -24,7 +24,7 @@ class RegradeTests(unittest.TestCase):
             data = self.run / 'data' / case_id
             data.mkdir(parents=True)
             Image.new('RGB', (8, 8)).save(data / 'input.png')
-            case = {'case_id': case_id, 'prompts': {'L0': 'control', 'L1': 'edit', 'L2b': 'literal target'}}
+            case = {'case_id': case_id, 'prompts': {'L0': 'control', 'L1': 'edit', 'L2b': 'literal target Preserve all content outside the specified edit targets.'}}
             (data / 'case.json').write_text(json.dumps(case))
             level = 'L0' if i == 3 else 'L1'
             output = f'results/model/{case_id}_{level}_0.png'

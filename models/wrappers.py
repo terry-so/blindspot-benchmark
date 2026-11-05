@@ -21,7 +21,10 @@ class GeminiImageEditor:
     def __init__(self, model_name: str, vertexai=True):
         self.model_name = model_name
         self.API_key = os.environ.get("GEMINI_API_KEY")
+        self.generation_context = {'provider': 'vertex' if vertexai else 'gemini'}
         if vertexai:
+            self.generation_context.update(project=os.environ['GOOGLE_CLOUD_PROJECT'],
+                                           location=os.environ.get('GOOGLE_CLOUD_LOCATION', 'global'))
             self.client = genai.Client(
                 vertexai=True,
                 project=os.environ["GOOGLE_CLOUD_PROJECT"],
